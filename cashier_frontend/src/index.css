@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* --toastify-color-info: #e9e9ff;
+  --toastify-color-success: #e4f8f0;
+  --toastify-color-warning: #fff2e2;
+  --toastify-color-error: #ffe7e6; */
+
+  --toastify-color-info: #696cff;
+  --toastify-color-success: #1ea97c;
+  --toastify-color-warning: #cc8925;
+  --toastify-color-error: #ff5757;
+}
+
+body {
+  margin: 0;
+  transition: color 0.5s, background-color 0.5s;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  background-color: #f1f2f3;
+  font-size: 16px;
+  min-height: 101vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.p-button {
+  background-color: #4CAF50;
+}
+
+.p-inputnumber-button {
+  width: 28px !important;
+}
+
+.p-inputnumber-button span {
+  font-size: 12px;
+}
+
+.p-dropdown-item {
+  height: 40px !important;
+}
+
+.card {
+  background-color: var(--surface-card);
+  padding: 1.5rem;
+  color: var(--surface-900);
+  margin-bottom: 1rem;
+  border-radius: 0.375rem;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.02), 0 0 2px rgba(0, 0, 0, 0.05),
+    0 1px 4px rgba(0, 0, 0, 0.08) !important;
+}
+
+.line-clamp-1,
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+
+.line-clamp-1 {
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  -webkit-line-clamp: 2;
+}
+
+.header-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  color: #6c757d;
+  border-radius: 50% !important;
+  width: 3rem;
+  height: 3rem;
+  cursor: pointer !important;
+  transition: background-color .2s;
+}
+
+.header-button:hover {
+  background-color: rgba(183, 224, 184, 0.3);
+}
+
+li a:hover {
+  background-color: rgba(183, 224, 184, 0.3);
+}

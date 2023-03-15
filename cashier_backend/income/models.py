@@ -1,3 +1,14 @@
 from django.db import models
+from cashier_backend.abstract_models import BaseModel
+from user.models import User, CashierGroup
 
-# Create your models here.
+
+class Income(BaseModel):
+    user_id = models.ForeignKey(User, related_name="incomes", on_delete=models.PROTECT)
+    amount = models.DecimalField(max_digits=10, decimal_places=0)
+    description = models.CharField(max_length=255)
+
+
+class GroupIncome(BaseModel):
+    income_id = models.ForeignKey(Income, related_name="group_income", on_delete=models.CASCADE)
+    cashier_group_id = models.ForeignKey(CashierGroup, related_name="group_incomes", on_delete=models.PROTECT)

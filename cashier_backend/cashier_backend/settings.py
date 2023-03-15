@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "user.apps.UserConfig",
+    "ckeditor",
+    "ckeditor_uploader",
     "expense.apps.ExpenseConfig",
     "income.apps.IncomeConfig",
     "rest_framework",
@@ -113,8 +115,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 REST_FRAMEWORK = {
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 2,
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
     ],
@@ -144,3 +144,7 @@ MEDIA_ROOT = "%s/static/" % BASE_DIR
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+CKEDITOR_UPLOAD_PATH = "ckeditor/cashier_backend/"
+
+AUTH_USER_MODEL = "user.User"

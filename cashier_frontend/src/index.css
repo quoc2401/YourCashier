@@ -28,8 +28,12 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-.p-button {
-  background-color: #4CAF50;
+.p-button-primary {
+  background-color: #744ea6;
+}
+
+.p-button-primary:hover {
+  background-color: #7255b0 !important;
 }
 
 .p-inputnumber-button {
@@ -87,5 +91,9 @@ body {
 }
 
 li a:hover {
-  background-color: rgba(183, 224, 184, 0.3);
+  background-color: rgba(116, 78, 166, 0.1);
+}
+
+.p-scrollpanel-content {
+  padding-right: 2px !important;
 }

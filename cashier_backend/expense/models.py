@@ -20,7 +20,7 @@ class Expense(BaseModel):
     description = models.CharField(max_length=255)
 
 
-class GroupExpense(BaseModel):
+class GroupExpense(models.Model):
     expense = models.ForeignKey(Expense, related_name="group_expense", on_delete=models.CASCADE)
     is_approved = models.BooleanField(default=False)
     cashier_group = models.ForeignKey(CashierGroup, related_name="groups_expenses", on_delete=models.PROTECT)

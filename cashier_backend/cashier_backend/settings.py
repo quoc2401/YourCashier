@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_yasg",
     "oauth2_provider",
+    "corsheaders",
 ]
 
 SITE_ID = 1
@@ -59,6 +60,7 @@ SITE_ID = 1
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -67,6 +69,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "cashier_backend.urls"
+
+ALLOWED_HOSTS = []
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 TEMPLATES = [
     {
@@ -143,9 +149,9 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 MEDIA_ROOT = "%s\\static\\" % BASE_DIR
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static/"),)
 
-print("asdasdasd: %s" % MEDIA_ROOT)
+# print("asdasdasd: %s" % MEDIA_ROOT)
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 

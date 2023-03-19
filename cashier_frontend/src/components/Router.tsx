@@ -7,6 +7,7 @@ import SignIn from "@/views/account/SignIn";
 import SignUp from "@/views/account/SignUp";
 import UserView from "@/views/individual/UserView";
 import GroupView from "@/views/group/GroupView";
+import GroupDetail from "@/views/group/GroupDetail";
 import AccountInfo from "@/views/account/AccountInfo";
 import UserAccountList from "@/views/admin/UserAccountList";
 import Dashboard from "@/views/admin/Dashboard";
@@ -15,11 +16,7 @@ const Router: FC = () => {
   const routes = useRoutes([
     {
       path: "/",
-      element: (
-        <PrivateRoute>
-          <Home />
-        </PrivateRoute>
-      ),
+      element: <Home />,
       children: [
         {
           index: true,
@@ -30,18 +27,18 @@ const Router: FC = () => {
           element: <AccountInfo />,
         },
         {
-          path: "group/:groupId",
+          path: "/groups",
           element: <GroupView />,
+        },
+        {
+          path: "/group/:groupId",
+          element: <GroupDetail />,
         },
       ],
     },
     {
       path: "/admin",
-      element: (
-        <PrivateRoute>
-          <Admin />
-        </PrivateRoute>
-      ),
+      element: <Admin />,
       children: [
         {
           element: <Dashboard />,

@@ -23,6 +23,6 @@ class GroupIncomeViewSet(
     generics.ListAPIView,
     generics.RetrieveAPIView,
     generics.UpdateAPIView,
-):
+): 
     queryset = GroupIncome.objects.all()
     serializer_class = GroupIncomeSerializer

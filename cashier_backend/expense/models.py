@@ -15,18 +15,18 @@ class WarningLevel(Enum):
 
 
 class Expense(BaseModel):
-    user_id = models.ForeignKey(User, related_name="expenses", on_delete=models.PROTECT)
+    user = models.ForeignKey(User, related_name="expenses", on_delete=models.PROTECT)
     amount = models.DecimalField(max_digits=10, decimal_places=0)
     description = models.CharField(max_length=255)
 
 
 class GroupExpense(BaseModel):
-    expense_id = models.ForeignKey(Expense, related_name="group_expense", on_delete=models.CASCADE)
+    expense = models.ForeignKey(Expense, related_name="group_expense", on_delete=models.CASCADE)
     is_approved = models.BooleanField(default=False)
-    cashier_group_id = models.ForeignKey(CashierGroup, related_name="groups_expenses", on_delete=models.PROTECT)
+    cashier_group = models.ForeignKey(CashierGroup, related_name="groups_expenses", on_delete=models.PROTECT)
 
 
 class ExpenseWarning(BaseModel):
-    user_id = models.ForeignKey(User, related_name="expense_warnings", on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name="expense_warnings", on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=0)
     warn_level = models.CharField(max_length=255, choices=WarningLevel.choices())

@@ -14,7 +14,7 @@ class User(AbstractUser):
 
 class CashierGroup(BaseModel):
     name = models.CharField(max_length=255)
-    supervisor_id = models.ForeignKey(
+    supervisor = models.ForeignKey(
         User,
         related_name="supervised_cashier_groups",
         related_query_name="supervised_cashier_groups",

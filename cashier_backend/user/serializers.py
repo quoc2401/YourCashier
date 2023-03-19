@@ -1,5 +1,6 @@
 from .models import User, CashierGroup
 from rest_framework import serializers
+from django.contrib.sites.models import Site
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -19,16 +20,38 @@ class UserSerializer(serializers.ModelSerializer):
 
         return u
 
+    # def get_absolute_url():
+    #     return "/users/"
+
     class Meta:
         model = User
-        fields = ("username", "password", "first_name", "last_name", "profile_picture")
+        fields = (
+            "username",
+            "email",
+            "password",
+            "first_name",
+            "last_name",
+            "profile_picture",
+        )
         extra_kwargs = {
             "password": {"write_only": True},
         }
 
 
-class UserResponseSerializer(UserSerializer):
-    pass
+class UserResponseSerializer(serializers.ModelSerializer):
+    profile_picture = serializers.SerializerMethodField(method_name="get_profile_picture")
+
+    def get_profile_picture(self, user):
+        user = User(**user)
+        if user.profile_picture:
+            domain = Site.objects.get_current().domain
+            path = user.profile_picture
+            url = "http://{domain}/static/{path}".format(domain=domain, path=path)
+            return url
+
+    class Meta:
+        model = User
+        fields = ("uuid", "username", "first_name", "last_name", "email", "profile_picture")
 
 
 class CashierGroupSerializer(serializers.ModelSerializer):

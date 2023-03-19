@@ -9,6 +9,6 @@ class Income(BaseModel):
     description = models.CharField(max_length=255)
 
 
-class GroupIncome(BaseModel):
+class GroupIncome(models.Model):
     income = models.ForeignKey(Income, related_name="group_income", on_delete=models.CASCADE)
     cashier_group = models.ForeignKey(CashierGroup, related_name="group_incomes", on_delete=models.PROTECT)

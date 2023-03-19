@@ -42,16 +42,27 @@ class UserResponseSerializer(serializers.ModelSerializer):
     profile_picture = serializers.SerializerMethodField(method_name="get_profile_picture")
 
     def get_profile_picture(self, user):
-        user = User(**user)
-        if user.profile_picture:
+        # print(user["profile_picture"])
+        request = self.context.get("request")
+        if request:
+            if user.profile_picture:
+                return request.build_absolute_uri("/static/%s" % user.profile_picture)
+
+        else:
             domain = Site.objects.get_current().domain
-            path = user.profile_picture
+            path = user.profile_picture if user.profile_picture else user["profile_picture"]
             url = "http://{domain}/static/{path}".format(domain=domain, path=path)
             return url
 
     class Meta:
         model = User
         fields = ("uuid", "username", "first_name", "last_name", "email", "profile_picture")
+
+
+class LoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("username", "password")
 
 
 class CashierGroupSerializer(serializers.ModelSerializer):

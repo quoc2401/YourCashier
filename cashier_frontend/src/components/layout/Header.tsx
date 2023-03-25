@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import { CircularProgress } from "react-cssfx-loading";
 import Tippy from "@tippyjs/react";
 import { Menu } from "primereact/menu";
+import { toast } from "react-toastify";
+import { useStore } from "@/services/stores";
+import { API_ACCOUNT } from "@/services/axiosClient";
 
 interface HeaderProps {
   setOpenedSideBar: (e: boolean) => void;
@@ -12,6 +15,19 @@ interface HeaderProps {
 const Header: FC<HeaderProps> = ({ setOpenedSideBar, openedSideBar }) => {
   const [loading, setLoading] = useState(false);
   const menu = useRef<Menu>(null);
+
+  
+  const setLogoutState = useStore(state => state.logout)
+  const handleLogout = async () => {
+    setLoading(true)
+    try {
+      await API_ACCOUNT.API_AUTH.apiLogout()
+      setLogoutState()
+    } catch (error) {
+      toast.error('An error occurred while logging out', { theme: 'colored' })
+    }
+    setLoading(false)
+  }
 
   const menuItems = [
     {
@@ -23,7 +39,7 @@ const Header: FC<HeaderProps> = ({ setOpenedSideBar, openedSideBar }) => {
     {
       label: "Sign out",
       command: () => {
-        // handleLogout();
+        handleLogout();
       },
     },
   ];

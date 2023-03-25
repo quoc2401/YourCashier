@@ -5,10 +5,8 @@ export * as API_ACCOUNT from "@/views/account/services/api";
 export * as API_GROUP from "@/views/group/services/api";
 export * as API_USER from "@/views/individual/services/api";
 
-export const controller = new AbortController();
-
 const axiosClient = axios.create({
-  baseURL: `${import.meta.env.VITE_APP_API_URL}api`,
+  baseURL: `${import.meta.env.VITE_APP_API_URL}`,
 });
 
 axiosClient.interceptors.request.use(async (config) => {

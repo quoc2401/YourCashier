@@ -10,6 +10,8 @@ const PrivateRoute: FC<PrivateRouteProps> = ({ children }) => {
   const currentUser = useStore((state) => state.currentUser);
   const location = useLocation();
 
+
+  console.log(currentUser)
   if (!currentUser)
     return (
       <Navigate

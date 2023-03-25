@@ -9,9 +9,6 @@ import "primeicons/primeicons.css";
 import "tippy.js/dist/tippy.css";
 import "react-toastify/dist/ReactToastify.min.css";
 import "./index.css";
-import dotenv from "dotenv";
-
-// dotenv.config()
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <BrowserRouter>

@@ -17,9 +17,8 @@ import json
 
 class UserViewSet(
     viewsets.ViewSet,
-    generics.CreateAPIView,
-    generics.DestroyAPIView,
-    generics.ListAPIView,
+    # generics.DestroyAPIView,
+    # generics.ListAPIView,
     generics.RetrieveAPIView,
     generics.UpdateAPIView,
 ):
@@ -33,7 +32,7 @@ class UserViewSet(
     permission_classes = [permissions.IsAuthenticated]
 
     def get_permissions(self):
-        if self.action in ["login", "create"]:
+        if self.action in ["login", "signup"]:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
@@ -42,13 +41,17 @@ class UserViewSet(
             return LoginSerializer
         return self.serializer_class
 
-    def create(self, request, *args, **kwargs):
+    @action(methods=["POST"], detail=False, serializer_class=CreateUserSerializer)
+    def signup(self, request):
         serializer = CreateUserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(RebuildUrlUserSerializer(serializer.data).data)
 
         return Response(data={**serializer.errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
+    
+    def logout(self, request):
+        pass
 
     @action(methods=["POST"], detail=False, parser_classes=[parsers.JSONParser])
     def login(self, request):

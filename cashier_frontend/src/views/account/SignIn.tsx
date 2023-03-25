@@ -8,7 +8,7 @@ import * as Yup from "yup"
 import { API_ACCOUNT } from "@/services/axiosClient"
 import { setAuthToken } from "@/services/axiosClient";
 import { toast } from "react-toastify";
-import { Navigate } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { Button } from "primereact/button";
@@ -17,9 +17,9 @@ const SignIn: FC = () => {
   const currentUser = useStore(state => state.currentUser)
   const setCurrentUser = useStore(state => state.setCurrentUser)
   const { redirect } = useQueryParam()
-  const [loading, setLoading] = useState(false)
+  const [ loading, setLoading ] = useState(false)
+  console.log(currentUser)
   useTitle('Your Cashier - Login')
-
   const formik = useFormik({
     initialValues: {
       username: '',
@@ -39,9 +39,8 @@ const SignIn: FC = () => {
         const res = await API_ACCOUNT.API_AUTH.apiLogin(value)
 
         if (res.status === 200) {
-          localStorage.setItem('pharmacy-token', res.data.access_token)
+          localStorage.setItem('user-token', res.data.access_token)
           setAuthToken(res.data.access_token)
-          console.log(res.data.user)
           setCurrentUser(res.data.user)
           toast.success('Login successful', {
             theme: 'colored'
@@ -142,6 +141,15 @@ const SignIn: FC = () => {
             className="!bg-primary-300 p-3 font-medium"
           />
         </form>
+        {/* sub commands here */}
+        <div className="flex justify-between w-100 mt-2">
+            <Link to="/forgot-password" className="text-xs italic font-semibold text-primary-100 hover:text-secondary-200">
+              Forgot password?
+            </Link>
+            <Link to="/signup" className="text-xs italic font-semibold text-primary-100 hover:text-secondary-200">
+              Don't have an account? Sign Up!
+            </Link>
+        </div>
       </div>
     </div>
   )

@@ -1,6 +1,7 @@
 from .models import User, CashierGroup
 from rest_framework import serializers
 from django.contrib.sites.models import Site
+from django.utils.text import camel_case_to_spaces, get_valid_filename
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -25,6 +26,17 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
         return u
 
+    def to_internal_value(self, data):
+        """
+        Override to_internal_value to convert camel case property names to snake case
+        """
+        snake_case_data = {}
+        for key, value in data.items():
+            # Convert camel case property names to snake case
+            snake_case_key = get_valid_filename(camel_case_to_spaces(key)).replace(" ", "_")
+            snake_case_data[snake_case_key] = value
+        return super().to_internal_value(snake_case_data)
+
     class Meta:
         model = User
         fields = (
@@ -45,8 +57,11 @@ class RebuildUrlUserSerializer(UserSerializer):
 
     def get_profile_picture(self, user):
         domain = Site.objects.get_current().domain
-        path = user["profile_picture"]
-        url = "http://{domain}/static{path}".format(domain=domain, path=path)
+        path = "/static/" + user["profile_picture"]
+        print(path)
+        path = path.replace("//", "/")
+        print(path)
+        url = "http://{domain}{path}".format(domain=domain, path=path)
         return url
 
 

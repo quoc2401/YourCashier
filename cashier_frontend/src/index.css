@@ -22,7 +22,7 @@ body {
     sans-serif;
   background-color: #f1f2f3;
   font-size: 16px;
-  min-height: 101vh;
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -42,10 +42,6 @@ body {
 
 .p-inputnumber-button span {
   font-size: 12px;
-}
-
-.p-dropdown-item {
-  height: 40px !important;
 }
 
 .card {

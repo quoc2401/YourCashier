@@ -6,12 +6,11 @@ class ApiAuth {
     constructor() {
     }
     apiLogin: any = (user: SignInUser) => {
-        console.log(user)
         return axios.post("users/login/", user)   
     };
 
     apiLogout: any = () => {
-        
+        return axios.post("users/logout/")
     }
 
     apiSignUp: any = (data: SignUpUser) => {
@@ -21,6 +20,10 @@ class ApiAuth {
         return axios.post("users/signup/", data, {
             headers: headers
         })
+    }
+
+    apiRefresh: any = (refresh_token: string) => {
+        return axios.post("users/refresh/", {refresh_token: refresh_token})
     }
 }
 

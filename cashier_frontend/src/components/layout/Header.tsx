@@ -15,9 +15,8 @@ interface HeaderProps {
 const Header: FC<HeaderProps> = ({ setOpenedSideBar, openedSideBar }) => {
   const [loading, setLoading] = useState(false);
   const menu = useRef<Menu>(null);
-
-  
   const setLogoutState = useStore(state => state.logout)
+
   const handleLogout = async () => {
     setLoading(true)
     try {

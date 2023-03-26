@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 // import { Navigate } from "react-router-dom";
 import { Outlet, NavLink } from "react-router-dom";
 import { useStore } from "@/services/stores";
@@ -27,6 +27,8 @@ const Home: FC = () => {
       path: "/groups",
     },
   ];
+
+  
 
   // if (currentUser && currentUser?.user_role === "ADMIN")
   //   return <Navigate to={`/admin`} replace />;

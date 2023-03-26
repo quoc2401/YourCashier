@@ -18,7 +18,7 @@ const SignIn: FC = () => {
   const setCurrentUser = useStore(state => state.setCurrentUser)
   const { redirect } = useQueryParam()
   const [ loading, setLoading ] = useState(false)
-  console.log(currentUser)
+  
   useTitle('Your Cashier - Login')
   const formik = useFormik({
     initialValues: {
@@ -40,7 +40,9 @@ const SignIn: FC = () => {
 
         if (res.status === 200) {
           localStorage.setItem('user-token', res.data.access_token)
+          localStorage.setItem('refresh-token', res.data.refresh_token)
           setAuthToken(res.data.access_token)
+
           setCurrentUser(res.data.user)
           toast.success('Login successful', {
             theme: 'colored'

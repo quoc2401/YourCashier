@@ -13,6 +13,7 @@ export const useStore = create<StoreType>((set) => ({
   setCurrentUser: (user) => set({ currentUser: user }),
   logout: () => {
     localStorage.removeItem("user-token");
+    localStorage.removeItem("refresh-token");
     setAuthToken(null);
     set({ currentUser: null });
   },

@@ -24,6 +24,7 @@ const SignUp: FC = () => {
   useTitle('Your Cashier - Login')
 
   const setCurrentUser = useStore(state => state.setCurrentUser)
+  const setRefreshToken = useStore(state => state.setRefreshToken)
   const currentUser = useStore(state => state.currentUser)
   const [loading, setLoading] = useState(false)
   const [preview, setPreview] = useState('/images/default_user.jpg')
@@ -75,8 +76,9 @@ const SignUp: FC = () => {
 
         if (res.status === 200) {
           localStorage.setItem('user-token', res.data.access_token)
+          localStorage.setItem('refresh-token', res.data.refresh_token)
           setAuthToken(res.data.access_token)
-          console.log(res.data)
+
           setCurrentUser(res.data)
           toast.success('Signup successful', {
             theme: 'colored'

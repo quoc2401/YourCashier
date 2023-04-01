@@ -80,9 +80,6 @@ class CashierGroupSerializer(serializers.ModelSerializer):
         return u
 
     def get_users(self, group):
-        print(group.users.all())
-        # u = RebuildUrlUserSerializer(group.users.all(), many=True).data
-
         data = [RebuildUrlUserSerializer(u.__dict__).data for u in group.users.all()]
         return data
 

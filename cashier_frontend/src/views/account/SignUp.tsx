@@ -70,8 +70,9 @@ const SignUp: FC = () => {
 
         if (res.status === 200) {
           localStorage.setItem("user-token", res.data.access_token);
+          localStorage.setItem("refresh-token", res.data.refresh_token);
           setAuthToken(res.data.access_token);
-          console.log(res.data);
+
           setCurrentUser(res.data);
           toast.success("Signup successful", {
             theme: "colored",

@@ -16,11 +16,7 @@ const Router: FC = () => {
   const routes = useRoutes([
     {
       path: "/",
-      element: (
-        <PrivateRoute>
-          <Home />
-        </PrivateRoute>
-      ),
+      element: <Home />,
       children: [
         {
           index: true,

@@ -17,6 +17,7 @@ class UserServices:
         password = request.data["password"]
         if username and password:
             domain = Site.objects.get_current().domain
+
             url = "{protocol}{domain}/{path}".format(protocol=config("PROTOCOL"), domain=domain, path="o/token/")
             data = {
                 "username": username,

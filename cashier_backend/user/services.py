@@ -26,6 +26,7 @@ class UserServices:
                 "client_secret": config("OAUTH_CLIENT_SECRET"),
             }
             res = requests.post(url=url, data=data)
+            print(res.json())
             if res.status_code == 200:
                 user = User.objects.get(username=username)
                 data = {**(res.json()), "user": RebuildUrlUserSerializer(user.__dict__).data}

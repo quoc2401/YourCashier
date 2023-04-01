@@ -17,9 +17,9 @@ const Router: FC = () => {
     {
       path: "/",
       element: (
-        <PrivateRoute>
+        // <PrivateRoute>
           <Home />
-        </PrivateRoute>
+        // </PrivateRoute>
       ),
       children: [
         {

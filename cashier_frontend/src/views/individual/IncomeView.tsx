@@ -5,13 +5,15 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Income } from "@/utils/responseInterfaces";
-import { moneyBodyTemplate } from "./components/templates";
+import { dateBodyTemplate, deleteBodyTemplate, moneyBodyTemplate } from "./components/templates";
 import { API_USER } from "@/services/axiosClient";
 import CreateFormModal from "./components/CreateFormModal";
 import { toast } from "react-toastify";
 import * as Yup from 'yup'
 import { useFormik } from "formik";
 import { Income as RIncome } from "@/utils/requestInterfaces";
+import TextEditor from "./components/TextEditor";
+import NumberEditor from "./components/NumberEditor";
 
 const IncomeView: FC = () => {
   const currentUser = useStore((state) => state.currentUser);
@@ -19,6 +21,7 @@ const IncomeView: FC = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false);
   const [openModalIncome, setOpenModalIncome] = useState(false);
+  const [editingRows, setEditingRows] = useState([])
   const [lazyParams, setLazyParams] = useState({
     first: 0,
     page: 1,
@@ -28,7 +31,6 @@ const IncomeView: FC = () => {
 
   useEffect(() => {
     const timeOut = setTimeout(() => loadIncomes(), 300)
-
     return () => clearTimeout(timeOut)
   }, [lazyParams])
 
@@ -57,19 +59,25 @@ const IncomeView: FC = () => {
     onSubmit: async value => {
       setLoading(true)
       try {
-        console.log(value)
-        // const res = await createCategoryApi(value)
-        // const data = res.data.data
+        const res = await API_USER.API_USER.apiCreateIncome(value)
+        const data = res.data
 
-        // if (res.status === 200) {
-        //   toast.success('create success')
+        if (res.status === 200) {
+          toast.success('Create success')
+          setIncomes(prev => {
+            prev = [
+              data,
+              ...prev
+            ]
+            return prev
+          })
         //   setCategories(prev => {
         //     prev = prependArray(data, prev)
         //     return prev
         //   })
-        //   formik.setValues(emptyCategory)
-        //   setNewDialog(false)
-        // }
+          formik.setValues(formik.initialValues)
+          setOpenModalIncome(false)
+        }
       } catch (error) {
         toast.error('Failed to create')
         console.log(error)
@@ -146,8 +154,48 @@ const IncomeView: FC = () => {
     })
   }
 
-  const handleCreate = () => {
+  const onRowEditChange = (e: any) => {
+    setEditingRows(e.data)
+  }
 
+  
+  // update
+  const onRowEditComplete = async (e: any) => {
+    setLoading(true)
+    const _incomes = [...incomes]
+    const { newData, index } = e
+
+    _incomes[index] = newData
+    setIncomes(_incomes)
+    try {
+      const res = await API_USER.API_USER.apiUpdateIncome(newData)
+      console.log(res.data)
+
+      if (res.status == 200) toast.success('update success')
+    } catch (error) {
+      console.log(error)
+      setIncomes(incomes)
+      toast.error('failed to update')
+    }
+
+    setLoading(false)
+  }
+
+  const handleDelete = async (rowData: any) => {
+    const _incomes = incomes.filter(i => i.id !== rowData.id)
+
+    setIncomes(_incomes)
+    try {
+      setLoading(true)
+      const res = await API_USER.API_USER.apiDeleteIncome(rowData.id)
+
+      if (res.status == 204) toast.success('delete success')
+    } catch (error) {
+      console.log(error)
+      setIncomes(incomes)
+      toast.error('failed to update')
+    }
+    setLoading(false)
   }
 
   const actionBodyTemplate = () => {
@@ -183,32 +231,52 @@ const IncomeView: FC = () => {
         onPage={onPage}
         rowHover
         first={lazyParams.first}
+        editMode="row"
+        editingRows={editingRows}
+        onRowEditChange={onRowEditChange}
+        onRowEditComplete={onRowEditComplete}
       >
         <Column field="order" style={{ minWidth: "8rem", width: "8rem" }} />
 
         <Column
         field="description"
         header="Description"
+        editor={options => <TextEditor options={options}/>}
         style={{ minWidth: "14rem" }}
         />
 
         <Column
-        field="amount"
-        header="Money Amount"
-        style={{ minWidth: "14rem" }}
-        body={moneyBodyTemplate}
+          field="amount"
+          header="Money Amount"
+          editor={options => <NumberEditor options={options}/>}
+          style={{ minWidth: "14rem" }}
+          body={moneyBodyTemplate}
         />
 
-        <Column field="created_date" header="Created Date" style={{ minWidth: "10rem" }} />
+        <Column 
+          field="created_date" 
+          header="Created Date" 
+          style={{ minWidth: "10rem" }} 
+          body={dateBodyTemplate}
+        />
+        <Column
+          rowEditor
+          className="min-w-[6rem] w-[8%]"
+          bodyStyle={{ textAlign: 'right' }}
+        />
+        <Column
+          className={`min-w-[6rem] w-[8%]`}
+          body={rowData => deleteBodyTemplate(rowData, handleDelete, editingRows)}
+        />
       </DataTable>
       <CreateFormModal 
         formik={formik}
         openModal={openModalIncome}
-        handleCreate={handleCreate}
+        handleCreate={() => formik.submitForm()}
         setOpenModal={setOpenModalIncome}
       />
     </>
-  );
+  ); 
 };
 
 export default IncomeView;

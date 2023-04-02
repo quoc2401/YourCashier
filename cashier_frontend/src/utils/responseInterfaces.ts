@@ -16,12 +16,14 @@ export interface User {
   
 
 export interface Expense {
+    id: number
     amount: number;
     description: string;
     created_date: string;
 }
 
 export interface Income {
+    id: number;
     amount: number;
     description: string;
     created_date: string;

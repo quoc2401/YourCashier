@@ -18,8 +18,8 @@ class IncomeSerializer(serializers.ModelSerializer):
 class CreateIncomeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Income
-        fields = ["amount", "description", "is_active"]
-        extra_kwargs = {"is_active": {"read_only": True}}
+        fields = ["amount", "description", "is_active", "created_date"]
+        extra_kwargs = {"is_active": {"read_only": True}, "created_date": {"read_only": True}}
 
 
 class GroupIncomeSerializer(serializers.ModelSerializer):

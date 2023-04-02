@@ -11,6 +11,10 @@ from .models import User, CashierGroup
 from oauth2_provider.models import AccessToken
 from expense.serializers import ExpenseSerializer
 from income.serializers import IncomeSerializer
+from datetime import datetime, date, timedelta
+from income.models import Income
+from expense.models import Expense
+from django.db.models import Sum
 
 
 class UserServices:
@@ -104,3 +108,28 @@ class UserServices:
         paginated_incomes = self.paginate_queryset(incomes)
 
         return self.get_paginated_response(IncomeSerializer(paginated_incomes, many=True).data)
+
+    def get_totals(self, request):
+        user_id = request.user.id
+        start_date = request.query_params.get("startDate")
+        end_date = request.query_params.get("endDate")
+
+        if not (start_date and end_date):
+            start_date = datetime.now().replace(day=1)
+            end_date = datetime.now()
+
+        total_income = Income.objects.filter(created_date__range=[start_date, end_date], user_id=user_id).aggregate(
+            total=Sum("amount")
+        )["total"]
+
+        total_expense = Expense.objects.filter(created_date__range=[start_date, end_date], user_id=user_id).aggregate(
+            total=Sum("amount")
+        )["total"]
+
+        print(total_income)
+
+        total_difference = total_income - total_expense
+
+        return Response(
+            data={"totalIncome": total_income, "totalExpense": total_expense, "totalDifference": total_difference}
+        )

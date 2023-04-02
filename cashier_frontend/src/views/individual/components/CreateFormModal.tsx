@@ -32,20 +32,22 @@ const CreateFormModal: FC<CreateFormProps> = ({
     onHide={() => setOpenModal(false)}
     >
         <form onSubmit={formik.handleSubmit}>
-            <div className="field mb-5">
-            <label htmlFor="amount">Amount</label>
-            <InputText
-                id="amount"
-                name="amount"
-                value={formik.values.name}
-                required
-                autoFocus
-                placeholder="Enter amount..."
-                className="rounded-md"
-                onChange={formik.handleChange}
-            />
+            <div className="field mb-5 flex justify-between">
+                <label htmlFor="amount">Amount</label>
+                <InputText
+                    id="amount"
+                    name="amount"
+                    type="number"
+                    value={formik.values.amount}
+                    required
+                    autoFocus
+                    step={1000}
+                    placeholder="Enter amount..."
+                    className="rounded-md"
+                    onChange={formik.handleChange}
+                />
             </div>
-            <div className="field mb-5">
+            <div className="field mb-5 flex justify-between">
             <label htmlFor="description">Description</label>
             <InputText
                 id="description"

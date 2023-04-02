@@ -158,3 +158,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CKEDITOR_UPLOAD_PATH = "ckeditor/cashier_backend/"
 
 AUTH_USER_MODEL = "user.User"
+
+TIME_ZONE = "Asia/Ho_Chi_Minh"

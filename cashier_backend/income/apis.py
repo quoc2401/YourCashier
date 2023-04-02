@@ -6,6 +6,7 @@ from user.models import User
 from .serializers import IncomeSerializer, GroupIncomeSerializer, CreateGroupIncomeSerializer, CreateIncomeSerializer
 from django.db import transaction
 from cashier_backend.paginators import Paginator
+from expense.perms import IsOwner
 
 
 class IncomeViewSet(
@@ -18,7 +19,7 @@ class IncomeViewSet(
 ):
     queryset = Income.objects.all()
     serializer_class = IncomeSerializer
-    permission_classes = [permissions.IsAuthenticated()]
+    permission_classes = [IsOwner()]
     pagination_class = Paginator
 
     def get_queryset(self):

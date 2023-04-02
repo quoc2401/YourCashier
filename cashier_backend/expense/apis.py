@@ -11,6 +11,7 @@ from .serializers import (
 )
 from django.db import transaction
 from cashier_backend.paginators import Paginator
+from .perms import IsOwner
 
 
 class ExpenseViewSet(
@@ -23,7 +24,7 @@ class ExpenseViewSet(
 ):
     queryset = Expense.objects.all()
     serializer_class = ExpenseSerializer
-    permission_classes = [permissions.IsAuthenticated()]
+    permission_classes = [IsOwner()]
     pagination_class = Paginator
 
     def get_queryset(self):

@@ -1,7 +1,6 @@
 from rest_framework import viewsets, permissions, generics, parsers, status
 from rest_framework.decorators import action, parser_classes as method_parsers
 from rest_framework.response import Response
-
 from .perms import IsOwner, IsAdmin
 from .models import User, CashierGroup
 from expense.models import GroupExpense
@@ -89,6 +88,13 @@ class UserViewSet(
     @action(methods=["GET"], detail=True)
     def incomes(self, request, pk):
         return UserServices.get_incomes(self)
+
+    @action(
+        methods=["GET"],
+        detail=False,
+    )
+    def total_stats(self, request):
+        return UserServices.get_totals(self, request)
 
 
 class CashierGroupViewSet(

@@ -4,6 +4,8 @@ from rest_framework.response import Response
 
 from .perms import IsOwner, IsAdmin
 from .models import User, CashierGroup
+from expense.models import Expense, GroupExpense
+from income.models import Income, GroupIncome
 from .serializers import (
     CreateUserSerializer,
     UserSerializer,
@@ -11,6 +13,8 @@ from .serializers import (
     LoginSerializer,
     RebuildUrlUserSerializer,
 )
+from expense.serializers import ExpenseSerializer, GroupExpenseSerializer
+from income.serializers import IncomeSerializer, GroupIncomeSerializer
 from decouple import config
 from django.db.models import Q
 import json
@@ -68,7 +72,7 @@ class UserViewSet(
         return UserServices.refresh(request=request)
 
     @action(methods=["GET"], detail=True)
-    def get_groups_by_user(self, request, pk):
+    def groups(self, request, pk):
         user = User.objects.get(pk=pk)
         groups = user.cashier_groups.filter(is_active=True)
 
@@ -118,3 +122,38 @@ class CashierGroupViewSet(
         group.users.add(*users)
 
         return Response(CashierGroupSerializer(group).data, status=status.HTTP_201_CREATED)
+
+    @action(methods=["GET"], detail=True)
+    def users(self, request, pk):
+        group = self.get_object()
+
+        data = [RebuildUrlUserSerializer(u.__dict__).data for u in group.users.filter(is_active=True)]
+
+        return Response(data=data, status=status.HTTP_200_OK)
+
+    @action(methods=["GET"], detail=True)
+    def expenses_not_approved(self, request, pk):
+        group_expenses = GroupExpense.objects.filter(cashier_group_id=pk, is_approved=False, expense__is_active=True)
+
+        return Response(
+            data=GroupExpenseSerializer(group_expenses, many=True).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @action(methods=["GET"], detail=True)
+    def expenses_approved(self, request, pk):
+        group_expenses = GroupExpense.objects.filter(cashier_group_id=pk, is_approved=True, expense__is_active=True)
+
+        return Response(
+            data=GroupExpenseSerializer(group_expenses, many=True).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @action(methods=["GET"], detail=True)
+    def income(self, request, pk):
+        group_expenses = GroupIncome.objects.filter(cashier_group_id=pk, income__is_active=True)
+
+        return Response(
+            data=GroupIncomeSerializer(group_expenses, many=True).data,
+            status=status.HTTP_200_OK,
+        )

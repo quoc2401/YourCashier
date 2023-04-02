@@ -9,3 +9,13 @@ export interface SignUpUser extends SignInUser {
     email: string;
     profile_picture: Object | string;
 }
+
+export interface Expense {
+    amount: number;
+    description: string;
+}
+
+export interface Income {
+    amount: number;
+    description: string;
+}

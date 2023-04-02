@@ -1,6 +1,22 @@
-class ApiLeader {}
+import { GroupRequest } from "./../../../utils/requestInterfaces";
+import axios from "@/services/axiosClient";
 
-class ApiMember {}
+class ApiGroup {
+  apiGetAllUsers = (params: any, filter: string) => {
+    return axios.get(
+      `users/?page=${params.page}&page_size=${params.rows}&kw=${filter}`
+    );
+  };
 
-export const API_MEMBER = new ApiMember();
-export const API_LEADER = new ApiLeader();
+  apiGetGroupByUser = (id: number | undefined, params: any, filter: string) => {
+    return axios.get(
+      `users/${id}/groups/?page=${params.page}&page_size=${params.rows}&kw=${filter}`
+    );
+  };
+
+  apiCreateGroup = (data: GroupRequest) => {
+    return axios.post(`cashier-groups/`, data);
+  };
+}
+
+export const API_GROUP = new ApiGroup();

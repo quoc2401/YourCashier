@@ -29,15 +29,16 @@ class UserViewSet(
 ):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    pagination_class = Paginator
     parser_classes = [parsers.MultiPartParser]
     permission_classes = [IsOwner()]
     pagination_class = Paginator
 
     def get_permissions(self):
-        if self.action in ["login", "signup"]:
+        if self.action in ["login", "signup", "list"]:
             return [permissions.AllowAny()]
-        if self.action in ["list"]:
-            return [IsAdmin()]
+        # if self.action in ["list"]:
+        #     return [IsAdmin()]
         return self.permission_classes
 
     def get_serializer_class(self):
@@ -78,8 +79,13 @@ class UserViewSet(
     def groups(self, request, pk):
         user = User.objects.get(pk=pk)
         groups = user.cashier_groups.filter(is_active=True)
+        kw = self.request.query_params.get("kw")
 
-        return Response(data=CashierGroupSerializer(groups, many=True).data, status=status.HTTP_200_OK)
+        if kw:
+            groups = groups.filter(name__icontains=kw)
+        paginated_incomes = self.paginate_queryset(groups)
+
+        return self.get_paginated_response(CashierGroupSerializer(paginated_incomes, many=True).data)
 
     @action(methods=["GET"], detail=True)
     def expenses(self, request, pk):
@@ -129,9 +135,10 @@ class CashierGroupViewSet(
 
         users = User.objects.filter(id__in=users_ids)
 
+        group.users.add(supervisor)
         group.users.add(*users)
 
-        return Response(CashierGroupSerializer(group).data, status=status.HTTP_201_CREATED)
+        return Response(CashierGroupSerializer(group).data, status=status.HTTP_200_OK)
 
     @action(methods=["GET"], detail=True)
     def users(self, request, pk):
@@ -144,26 +151,32 @@ class CashierGroupViewSet(
     @action(methods=["GET"], detail=True)
     def expenses_not_approved(self, request, pk):
         group_expenses = GroupExpense.objects.filter(cashier_group_id=pk, is_approved=False, expense__is_active=True)
+        kw = self.request.query_params.get("kw")
 
-        return Response(
-            data=GroupExpenseSerializer(group_expenses, many=True).data,
-            status=status.HTTP_200_OK,
-        )
+        if kw:
+            group_expenses = group_expenses.filter(name__icontains=kw)
+        paginated_expenses = self.paginate_queryset(group_expenses)
+
+        return self.get_paginated_response(GroupExpenseSerializer(paginated_expenses, many=True).data)
 
     @action(methods=["GET"], detail=True)
     def expenses_approved(self, request, pk):
         group_expenses = GroupExpense.objects.filter(cashier_group_id=pk, is_approved=True, expense__is_active=True)
+        kw = self.request.query_params.get("kw")
 
-        return Response(
-            data=GroupExpenseSerializer(group_expenses, many=True).data,
-            status=status.HTTP_200_OK,
-        )
+        if kw:
+            group_expenses = group_expenses.filter(name__icontains=kw)
+        paginated_expenses = self.paginate_queryset(group_expenses)
+
+        return self.get_paginated_response(GroupExpenseSerializer(paginated_expenses, many=True).data)
 
     @action(methods=["GET"], detail=True)
     def income(self, request, pk):
-        group_expenses = GroupIncome.objects.filter(cashier_group_id=pk, income__is_active=True)
+        group_income = GroupIncome.objects.filter(cashier_group_id=pk, income__is_active=True)
+        kw = self.request.query_params.get("kw")
 
-        return Response(
-            data=GroupIncomeSerializer(group_expenses, many=True).data,
-            status=status.HTTP_200_OK,
-        )
+        if kw:
+            group_income = group_income.filter(name__icontains=kw)
+        paginated_incomes = self.paginate_queryset(group_income)
+
+        return self.get_paginated_response(GroupIncomeSerializer(paginated_incomes, many=True).data)

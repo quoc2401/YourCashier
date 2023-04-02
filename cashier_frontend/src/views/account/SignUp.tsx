@@ -104,7 +104,7 @@ const SignUp: FC = () => {
         <img
           src={preview}
           alt="default_user"
-          className="rounded-full m-auto border border-solid border-slate-300 !w-16 !h-16"
+          className="rounded-full m-auto border border-solid border-slate-300 !w-16 !h-16 object-cover"
         />
         <form onSubmit={formik.handleSubmit} className="p-fluid space-y-6 mt-6">
           <UsernameField

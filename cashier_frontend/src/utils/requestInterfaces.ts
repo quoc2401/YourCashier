@@ -10,8 +10,18 @@ export interface SignUpUser extends SignInUser {
   profile_picture: any | string;
 }
 
+export interface Expense {
+  amount: number;
+  description: string;
+}
+
+export interface Income {
+  amount: number;
+  description: string;
+}
+
 export interface GroupRequest {
   name: string;
-  users: Array<number>;
+  users: Array<number | undefined>;
   is_active: boolean;
 }

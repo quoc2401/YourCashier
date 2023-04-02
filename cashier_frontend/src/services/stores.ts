@@ -1,5 +1,5 @@
 import create from "zustand";
-import { User } from "@/utils/response_interfaces";
+import { User } from "@/utils/responseInterfaces";
 import { setAuthToken } from "./axiosClient";
 
 interface StoreType {

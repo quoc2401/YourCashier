@@ -1,24 +1,20 @@
 import { FC } from "react";
-import { useFormik, Formik } from "formik";
+import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Navigate, Link } from "react-router-dom";
-import { InputText } from "primereact/inputtext";
-import { Password } from "primereact/password";
 import { Button } from "primereact/button";
 import { API_ACCOUNT } from "@/services/axiosClient";
 import { setAuthToken } from "@/services/axiosClient";
 import { toast } from "react-toastify";
 import { useStore } from "@/services/stores";
-import { useQueryParam } from "@/hooks/useQueryParam";
 import { useTitle } from "@/hooks/useTitle";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import UsernameField from "./components/UsernameField";
 import PasswordField from "./components/PasswordField";
 import EmailField from "./components/EmailField";
 import FirstNameField from "./components/FirstNameField";
 import LastNameField from "./components/LastNameField";
 import ProfilePictureField from "./components/ProfilePictureField";
-import { Image } from "primereact/image";
 
 const SignUp: FC = () => {
   useTitle("Your Cashier - Login");
@@ -108,7 +104,7 @@ const SignUp: FC = () => {
         <img
           src={preview}
           alt="default_user"
-          className="rounded-full m-auto border border-solid border-slate-300 !w-16 !h-16"
+          className="rounded-full m-auto border border-solid border-slate-300 !w-16 !h-16 object-cover"
         />
         <form onSubmit={formik.handleSubmit} className="p-fluid space-y-6 mt-6">
           <UsernameField

@@ -93,3 +93,7 @@ li a:hover {
 .p-scrollpanel-content {
   padding-right: 2px !important;
 }
+
+.p-avatar img {
+  object-fit: cover;
+}

@@ -8,10 +8,24 @@ export interface User {
   is_superuser?: boolean;
   is_staff?: boolean;
   is_active?: boolean;
-  created_at?: string;
-  updated_at?: string | null;
+  created_date?: string;
+  updated_date?: string | null;
   last_login?: string;
   profile_picture?: string;
+}
+
+export interface Expense {
+  id: number;
+  amount: number;
+  description: string;
+  created_date: string;
+}
+
+export interface Income {
+  id: number;
+  amount: number;
+  description: string;
+  created_date: string;
 }
 
 export interface Group {

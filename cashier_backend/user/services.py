@@ -9,6 +9,12 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import User, CashierGroup
 from oauth2_provider.models import AccessToken
+from expense.serializers import ExpenseSerializer
+from income.serializers import IncomeSerializer
+from datetime import datetime, date, timedelta
+from income.models import Income
+from expense.models import Expense
+from django.db.models import Sum
 
 
 class UserServices:
@@ -27,11 +33,13 @@ class UserServices:
                 "client_secret": config("OAUTH_CLIENT_SECRET"),
             }
             res = requests.post(url=url, data=data)
+            if res.status_code == 400:
+                return Response(data={"error": "Username or password invalid"}, status=res.status_code)
             if res.status_code == 200:
                 user = User.objects.get(username=username)
                 data = {**(res.json()), "user": RebuildUrlUserSerializer(user.__dict__).data}
                 return Response(data=data, status=status.HTTP_200_OK)
-            return Response(status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response("errors: username and password are required", status.HTTP_400_BAD_REQUEST)
 
     def signup(request):
@@ -79,3 +87,49 @@ class UserServices:
                 return Response(status=status.HTTP_200_OK)
             return Response(status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response("errors: refresh_token is required", status.HTTP_400_BAD_REQUEST)
+
+    def get_expenses(self):
+        u = self.get_object()
+        kw = self.request.query_params.get("kw")
+        expenses = u.expenses.filter(is_active=True)
+        if kw:
+            expenses = expenses.filter(description__icontains=kw)
+        paginated_expenses = self.paginate_queryset(expenses)
+
+        return self.get_paginated_response(ExpenseSerializer(paginated_expenses, many=True).data)
+        # return Response(data=)
+
+    def get_incomes(self):
+        u = self.get_object()
+        kw = self.request.query_params.get("kw")
+        incomes = u.incomes.filter(is_active=True)
+        if kw:
+            incomes = incomes.filter(description__icontains=kw)
+        paginated_incomes = self.paginate_queryset(incomes)
+
+        return self.get_paginated_response(IncomeSerializer(paginated_incomes, many=True).data)
+
+    def get_totals(self, request):
+        user_id = request.user.id
+        start_date = request.query_params.get("startDate")
+        end_date = request.query_params.get("endDate")
+
+        if not (start_date and end_date):
+            start_date = datetime.now().replace(day=1)
+            end_date = datetime.now()
+
+        total_income = Income.objects.filter(created_date__range=[start_date, end_date], user_id=user_id).aggregate(
+            total=Sum("amount")
+        )["total"]
+
+        total_expense = Expense.objects.filter(created_date__range=[start_date, end_date], user_id=user_id).aggregate(
+            total=Sum("amount")
+        )["total"]
+
+        print(total_income)
+
+        total_difference = total_income - total_expense
+
+        return Response(
+            data={"totalIncome": total_income, "totalExpense": total_expense, "totalDifference": total_difference}
+        )

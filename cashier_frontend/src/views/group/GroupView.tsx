@@ -5,15 +5,22 @@ import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import ModalCreateGroup from "./components/ModalCreateGroup";
 import { API_GROUP } from "@/services/axiosClient";
-import { Group } from "@/utils/response_interfaces";
+import { Group } from "@/utils/responseInterfaces";
 import { useStore } from "@/services/stores";
+import { formatDate } from "@/utils";
+import { Avatar } from "primereact/avatar";
+import { AvatarGroup } from "primereact/avatargroup";
+import { Calendar } from "primereact/calendar";
+import { useNavigate } from "react-router-dom";
 
 const GroupView: FC = () => {
+  const navigate = useNavigate();
   const currentUser = useStore((state) => state.currentUser);
-  const [groups, setGroups] = useState([]);
+  const [groups, setGroups] = useState<Array<Group>>([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false);
   const [filters, setFilter] = useState("");
+  const [date, setDate] = useState<Date | Date[] | undefined>(undefined);
   const lazyTimeOut = useRef<ReturnType<typeof setTimeout>>();
   const [lazyState, setLazyState] = useState({
     first: 0,
@@ -21,32 +28,48 @@ const GroupView: FC = () => {
     page: 1,
   });
   const [openModalGroup, setOpenModalGroup] = useState(false);
+  const firstUpdate = useRef<any>(null);
 
   useEffect(() => {
-    lazyTimeOut.current = setTimeout(async () => {
-      loadGroups();
-    }, 500);
+    loadGroups();
+  }, [lazyState]);
+
+  useEffect(() => {
+    if (firstUpdate.current) {
+      console.log("aaaaaaaaa");
+      lazyTimeOut.current = setTimeout(async () => {
+        loadGroups();
+      }, 500);
+    } else {
+      firstUpdate.current = true;
+    }
     return () => clearTimeout(lazyTimeOut.current);
-  }, [lazyState, filters]);
+  }, [filters, date]);
 
   const loadGroups = async () => {
     setLoading(true);
 
-    const res = await API_GROUP.API_GROUP.apiGetGroupByUser(
+    const { data: res } = await API_GROUP.API_GROUP.apiGetGroupByUser(
       currentUser?.id,
       lazyState,
       filters
     );
 
-    console.log(res);
-
     setGroups(res.data);
-    setTotalRecords(10);
+    setTotalRecords(res.totalRecords);
     setLoading(false);
   };
 
+  const pushNewGroup = (group: Group) => {
+    setGroups([...groups, group]);
+  };
+
   const onPageChange = (e: any) => {
-    setLazyState(e);
+    setLazyState({ ...e, page: e.page + 1 });
+  };
+
+  const onRowDoubleClick = (e: any) => {
+    navigate(`/group/${e.data.id}`);
   };
 
   const header = () => {
@@ -55,11 +78,23 @@ const GroupView: FC = () => {
         <Button
           label="Create new group"
           icon="pi pi-plus"
-          className="font-semibold p-button-primary"
+          className="font-semibold p-button-primary flex-0"
           onClick={() => setOpenModalGroup(true)}
         />
 
-        <div className="flex w-full sm:w-2/4 lg:w-1/4">
+        <Calendar
+          value={date}
+          v-model="filterParams.search.orderDate"
+          touchUI={false}
+          selectionMode="range"
+          className="w-full sm:w-2/4 lg:w-1/4 ml-auto"
+          dateFormat="dd/mm/yy"
+          placeholder="Từ ngày - Đến ngày"
+          readOnlyInput
+          onChange={(e) => setDate(e.value)}
+        />
+
+        <div className="flex w-full sm:w-1/4">
           <span className="p-input-icon-left w-full">
             <i className="pi pi-search" />
 
@@ -76,13 +111,53 @@ const GroupView: FC = () => {
     );
   };
 
-  const actionBodyTemplate = () => {
+  const bodySupervisor = (rowData: Group) => {
     return (
-      <div className="">
-        <Button
-          icon="pi pi-pencil"
-          className="p-button-rounded p-button-text"
+      <div className="flex items-center">
+        <Avatar
+          image={
+            rowData.supervisor.profile_picture ||
+            `https://res.cloudinary.com/dynupxxry/image/upload/v1660532211/non-avatar_nw91c3.png`
+          }
+          className="mr-2"
+          size="normal"
+          shape="circle"
         />
+
+        <span>
+          {rowData.supervisor.first_name} {rowData.supervisor.last_name}
+        </span>
+      </div>
+    );
+  };
+
+  const bodyUsers = (rowData: Group) => {
+    return (
+      <div className="flex items-center">
+        <AvatarGroup className="mb-3">
+          {rowData.users.map((user, index) =>
+            index < 5 ? (
+              <Avatar
+                key={user.id}
+                image={
+                  user.profile_picture ||
+                  `https://res.cloudinary.com/dynupxxry/image/upload/v1660532211/non-avatar_nw91c3.png`
+                }
+                size="normal"
+                shape="circle"
+              />
+            ) : null
+          )}
+
+          {rowData.users.length >= 6 && (
+            <Avatar
+              label={`+${(rowData.users.length - 5).toString()}`}
+              shape="circle"
+              size="normal"
+              style={{ backgroundColor: "#9c27b0", color: "#ffffff" }}
+            />
+          )}
+        </AvatarGroup>
       </div>
     );
   };
@@ -93,6 +168,7 @@ const GroupView: FC = () => {
         title="New Group"
         isOpen={openModalGroup}
         setIsOpen={setOpenModalGroup}
+        setGroupList={pushNewGroup}
       />
 
       <div className="px-4">
@@ -115,8 +191,9 @@ const GroupView: FC = () => {
         size="small"
         rowHover
         onPage={onPageChange}
+        onRowDoubleClick={onRowDoubleClick}
       >
-        <Column style={{ minWidth: "8rem", width: "8rem" }} />
+        <Column style={{ width: "6rem" }} />
 
         <Column
           field="name"
@@ -124,24 +201,26 @@ const GroupView: FC = () => {
           style={{ minWidth: "14rem" }}
         />
 
-        {/* <Column
+        <Column
           field="supervisor"
           header="Leader"
           style={{ minWidth: "14rem" }}
-        /> */}
+          body={bodySupervisor}
+        />
 
         <Column
           field="created_date"
           header="Create date"
           style={{ minWidth: "14rem" }}
+          body={(value) => formatDate(value.created_date)}
         />
 
-        {/* <Column
+        <Column
           field="users"
           header="Members"
-          body={actionBodyTemplate}
-          style={{ minWidth: "6rem" }}
-        /> */}
+          body={bodyUsers}
+          style={{ minWidth: "14rem" }}
+        />
       </DataTable>
     </>
   );

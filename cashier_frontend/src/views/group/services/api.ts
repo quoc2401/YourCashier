@@ -1,9 +1,11 @@
-import { GroupRequest } from "./../../../utils/request_interfaces";
+import { GroupRequest } from "./../../../utils/requestInterfaces";
 import axios from "@/services/axiosClient";
 
 class ApiGroup {
-  apiGetAllUsers = () => {
-    return axios.get(`users/`);
+  apiGetAllUsers = (params: any, filter: string) => {
+    return axios.get(
+      `users/?page=${params.page}&page_size=${params.rows}&kw=${filter}`
+    );
   };
 
   apiGetGroupByUser = (id: number | undefined, params: any, filter: string) => {

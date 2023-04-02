@@ -86,12 +86,21 @@ class UserServices:
 
     def get_expenses(self):
         u = self.get_object()
+        kw = self.request.query_params.get("kw")
         expenses = u.expenses.filter(is_active=True)
+        if kw:
+            expenses = expenses.filter(description__icontains=kw)
+        paginated_expenses = self.paginate_queryset(expenses)
 
-        return Response(data=ExpenseSerializer(expenses, many=True).data, status=status.HTTP_200_OK)
+        return self.get_paginated_response(ExpenseSerializer(paginated_expenses, many=True).data)
+        # return Response(data=)
 
     def get_incomes(self):
         u = self.get_object()
+        kw = self.request.query_params.get("kw")
         incomes = u.incomes.filter(is_active=True)
+        if kw:
+            incomes = incomes.filter(description__icontains=kw)
+        paginated_incomes = self.paginate_queryset(incomes)
 
-        return Response(data=IncomeSerializer(incomes, many=True).data, status=status.HTTP_200_OK)
+        return self.get_paginated_response(IncomeSerializer(paginated_incomes, many=True).data)

@@ -16,6 +16,13 @@ class ExpenseSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class CreateExpenseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Expense
+        fields = ["amount", "description", "is_active"]
+        extra_kwargs = {"is_active": {"read_only": True}}
+
+
 class GroupExpenseSerializer(serializers.ModelSerializer):
     expense = serializers.SerializerMethodField(method_name="get_expense")
 
@@ -29,7 +36,7 @@ class GroupExpenseSerializer(serializers.ModelSerializer):
 
 
 class CreateGroupExpenseSerializer(serializers.ModelSerializer):
-    expense = ExpenseSerializer()
+    expense = CreateExpenseSerializer()
 
     class Meta:
         model = GroupExpense

@@ -3,8 +3,14 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from .models import Expense, GroupExpense
 from user.models import User
-from .serializers import ExpenseSerializer, GroupExpenseSerializer, CreateGroupExpenseSerializer
+from .serializers import (
+    ExpenseSerializer,
+    GroupExpenseSerializer,
+    CreateGroupExpenseSerializer,
+    CreateExpenseSerializer,
+)
 from django.db import transaction
+from cashier_backend.paginators import Paginator
 
 
 class ExpenseViewSet(
@@ -18,9 +24,36 @@ class ExpenseViewSet(
     queryset = Expense.objects.all()
     serializer_class = ExpenseSerializer
     permission_classes = [permissions.IsAuthenticated()]
+    pagination_class = Paginator
+
+    def get_queryset(self):
+        q = self.queryset
+        kw = self.request.query_params.get("kw")
+        new_page_size = self.request.query_params.get("page_size")
+
+        if kw:
+            q = q.filter(description__icontains=kw)
+        if new_page_size:
+            self.pagination_class.page_size = new_page_size
+
+        return q
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return CreateExpenseSerializer
+        return self.serializer_class
+
+    def get_permissions(self):
+        return self.permission_classes
 
     def create(self, request, *args, **kwargs):
-        return Response(data={}, status=status.HTTP_200_OK)
+        u = request.user
+        serializer = CreateExpenseSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.validated_data["user"] = u
+            serializer.save()
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        return Response(data=serializer.error_messages, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class GroupExpenseViewSet(

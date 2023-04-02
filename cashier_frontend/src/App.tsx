@@ -21,17 +21,18 @@ const App: FC = () => {
   }, [])
   
   const getUserProfile = async () => {
-    try {
-      const res = await API_ACCOUNT.API_AUTH.apiRefresh(refresh_token)
-      if (res.status === 200) {
-        localStorage.setItem('user-token', res.data.access_token)
-        localStorage.setItem('refresh-token', res.data.refresh_token)
-        setAuthToken(res.data.access_token)
-        setCurrentUser(res.data.user)
-        console.log(refresh_token)
+    if (refresh_token) {
+      try {
+        const res = await API_ACCOUNT.API_AUTH.apiRefresh(refresh_token)
+        if (res.status === 200) {
+          localStorage.setItem('user-token', res.data.access_token)
+          localStorage.setItem('refresh-token', res.data.refresh_token)
+          setAuthToken(res.data.access_token)
+          setCurrentUser(res.data.user)
+        }
+      } catch (error) {
+        logout()
       }
-    } catch (error) {
-      logout()
     }
   }
 

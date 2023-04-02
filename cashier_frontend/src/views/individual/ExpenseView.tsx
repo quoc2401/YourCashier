@@ -8,42 +8,36 @@ import { Expense } from "@/utils/responseInterfaces";
 import { moneyBodyTemplate } from "./components/templates";
 import { API_USER } from "@/services/axiosClient";
 
-const fakeData: Array<Expense> = [{
-  amount: 500000,
-  description: "for xxx",
-  created_date: "2023-03-29",
-},{
-  amount: 500000,
-  description: "for xxx",
-  created_date: "2023-03-29",
-},{
-  amount: 500000,
-  description: "for xxx",
-  created_date: "2023-03-29",
-}]
-
 const ExpenseView: FC = () => {
   const currentUser = useStore((state) => state.currentUser);
   const [expenses, setExpenses] = useState<Array<Expense>>([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [lazyState, setlazyState] = useState({
+  const [lazyParams, setLazyParams] = useState({
     first: 0,
-    rows: 10,
     page: 1,
-    sortField: null,
-    sortOrder: null,
+    page_size: 10,
+    kw: "",
   });
   const [openModalGroup, setOpenModalGroup] = useState(false);
   
   useEffect(() => {
-    loadExpenses()
-  }, [])
+    const timeOut = setTimeout(() => loadExpenses(), 300)
+
+    return () => clearTimeout(timeOut)
+  }, [lazyParams])
 
   const loadExpenses = async () => {
-    const res = await API_USER.API_USER.apiGetExpenses(currentUser?.id)
-    const data = res.data
-    setExpenses(data)
+    try {
+      setLoading(true)
+      const res = await API_USER.API_USER.apiGetExpenses(currentUser?.id, lazyParams)
+      const data = res.data
+      setExpenses(data.data)
+      setTotalRecords(data.totalRecords)
+    } catch (error) {
+      console.error(error)
+    }
+    setLoading(false)
   }
   
   const header = () => {
@@ -63,12 +57,57 @@ const ExpenseView: FC = () => {
             <InputText
               className="rounded-md"
               placeholder="Search group name "
+              value={lazyParams.kw}
+              onChange={handleSearch}
+            />
+          </span>
+          <span className="p-input-icon-right">
+            <i 
+              className={`pi pi-times ${lazyParams.kw == "" ? "hidden": ""} cursor-pointer`}
+              onClick={handleCancelSearch}
             />
           </span>
         </div>
       </div>
     );
   };
+
+  const handleSearch = (e: any) => {
+    setLazyParams(prev => {
+      const _lazyParams = {
+        ...prev,
+        first: 0,
+        page: 1,
+        kw: e.target.value
+      }
+      return _lazyParams
+    })
+  }
+
+  const handleCancelSearch = (e: any) => {
+    setLazyParams(prev => {
+      const _lazyParams = {
+        ...prev,
+        first: 0,
+        page: 1,
+        kw: ""
+      }
+      return _lazyParams
+    })
+  }
+
+  const onPage = (e: any) => {
+    setLazyParams(prev => {
+      const _lazyParams = {
+        ...lazyParams,
+        page: e.page + 1,
+        page_size: e.rows,
+        first: e.first,
+      }
+
+      return _lazyParams
+    })
+  }
 
   const actionBodyTemplate = () => {
     return (
@@ -92,7 +131,7 @@ const ExpenseView: FC = () => {
         value={expenses}
         paginator
         dataKey="id"
-        rows={10}
+        rows={lazyParams.page_size}
         rowsPerPageOptions={[10, 20, 50, 100]}
         totalRecords={totalRecords}
         loading={loading}
@@ -100,6 +139,8 @@ const ExpenseView: FC = () => {
         emptyMessage="No groups found"
         stripedRows
         lazy
+        onPage={onPage}
+        first={lazyParams.first}
         responsiveLayout="scroll"
         size="small"
         rowHover

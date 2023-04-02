@@ -4,8 +4,8 @@ from rest_framework.response import Response
 
 from .perms import IsOwner, IsAdmin
 from .models import User, CashierGroup
-from expense.models import Expense, GroupExpense
-from income.models import Income, GroupIncome
+from expense.models import GroupExpense
+from income.models import GroupIncome
 from .serializers import (
     CreateUserSerializer,
     UserSerializer,
@@ -13,11 +13,10 @@ from .serializers import (
     LoginSerializer,
     RebuildUrlUserSerializer,
 )
-from expense.serializers import ExpenseSerializer, GroupExpenseSerializer
-from income.serializers import IncomeSerializer, GroupIncomeSerializer
+from expense.serializers import GroupExpenseSerializer
+from income.serializers import GroupIncomeSerializer
 from decouple import config
 from django.db.models import Q
-import json
 from .services import UserServices
 from cashier_backend.paginators import Paginator
 
@@ -33,6 +32,7 @@ class UserViewSet(
     serializer_class = UserSerializer
     parser_classes = [parsers.MultiPartParser]
     permission_classes = [IsOwner()]
+    pagination_class = Paginator
 
     def get_permissions(self):
         if self.action in ["login", "signup"]:
@@ -49,9 +49,13 @@ class UserViewSet(
     def get_queryset(self):
         q = self.queryset
         kw = self.request.query_params.get("kw")
+        new_page_size = self.request.query_params.get("page_size")
 
         if kw:
-            q = q.filter(Q(first_name__icontains=kw) | Q(last_name__icontains=kw))
+            if self.action not in ["expenses", "incomes"]:
+                q = q.filter(Q(first_name__icontains=kw) | Q(last_name__icontains=kw))
+        if new_page_size:
+            self.pagination_class.page_size = new_page_size
 
         return q
 

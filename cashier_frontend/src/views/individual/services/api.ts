@@ -3,12 +3,26 @@ import { useStore } from "@/services/stores";
 
 class ApiUser {
     
-    apiGetExpenses: any = (id: number) => {
-        return axiosClient.get(`users/${id}/expenses/`)
+    apiGetExpenses: any = (userId: number, params: any) => {
+        const queryParams = params
+        ? Object.keys(params)
+            .map(
+              k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k])
+            )
+            .join('&')
+        : ''
+        return axiosClient.get(`users/${userId}/expenses/?${queryParams}`)
     }
 
-    apiGetIncomes: any = (id: number) => {
-        return axiosClient.get(`users/${id}/incomes/`)
+    apiGetIncomes: any = (userId: number, params: any) => {
+        const queryParams = params
+        ? Object.keys(params)
+            .map(
+              k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k])
+            )
+            .join('&')
+        : ''
+        return axiosClient.get(`users/${userId}/incomes/?${queryParams}`)
     }
 }
 

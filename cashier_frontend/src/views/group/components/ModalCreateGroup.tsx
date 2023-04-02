@@ -48,14 +48,14 @@ const ModalCreateGroup: FC<ModalCreateGroupProps> = ({
         <Button
           label="Cancel"
           onClick={() => closeDialog()}
+          autoFocus
           className="p-button-text p-button-danger font-semibold"
         />
 
         <Button
           type="button"
           label="Create"
-          className="font-semibold p-button-success"
-          autoFocus
+          className="font-semibold p-button-primary"
           onClick={() => formik.handleSubmit()}
         />
       </div>
@@ -66,6 +66,8 @@ const ModalCreateGroup: FC<ModalCreateGroupProps> = ({
       <ModalUserList
         isOpen={openModalUserList}
         setIsOpen={setOpenModalUserList}
+        initValue={formik.values.member}
+        setMemberValue={(newValue) => formik.setFieldValue("member", newValue)}
       />
 
       <Dialog

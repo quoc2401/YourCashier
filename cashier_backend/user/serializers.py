@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("uuid", "username", "first_name", "last_name", "email", "profile_picture")
+        fields = ("id", "uuid", "username", "first_name", "last_name", "email", "profile_picture")
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -72,6 +72,20 @@ class LoginSerializer(serializers.ModelSerializer):
 
 
 class CashierGroupSerializer(serializers.ModelSerializer):
+    supervisor = serializers.SerializerMethodField(method_name="get_supervisor")
+    users = serializers.SerializerMethodField(method_name="get_users")
+
+    def get_supervisor(self, group):
+        u = RebuildUrlUserSerializer(group.supervisor.__dict__).data
+        return u
+
+    def get_users(self, group):
+        print(group.users.all())
+        # u = RebuildUrlUserSerializer(group.users.all(), many=True).data
+
+        data = [RebuildUrlUserSerializer(u.__dict__).data for u in group.users.all()]
+        return data
+
     class Meta:
         model = CashierGroup
         fields = "__all__"

@@ -11,7 +11,7 @@ module.exports = {
       },
       colors: {
         overlay: "rgba(0,0,0,0.4)",
-        "primary-50": "rgba(116, 78, 166, 0.2);",
+        "primary-50": "rgba(116, 78, 166, 0.1);",
         "primary-100": "#7255b0",
         "primary-200": "#7351ab",
         "primary-300": "#744ea6",

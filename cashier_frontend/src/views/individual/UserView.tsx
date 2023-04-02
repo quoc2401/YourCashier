@@ -3,9 +3,10 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import ExpenseView from "./ExpenseView";
 import IncomeView from "./IncomeView";
+import { TabView, TabPanel } from "primereact/tabview";
 
 const UserView: FC = () => {
-
+  
   const header = () => {
     return (
       <div className="flex justify-between items-center px-2">
@@ -43,8 +44,15 @@ const UserView: FC = () => {
 
   return (
     <>
-      <ExpenseView /> 
-      <IncomeView />
+      <TabView>
+        <TabPanel header="Incomes">
+          <IncomeView />
+        </TabPanel>
+
+        <TabPanel header="Expenses">
+          <ExpenseView /> 
+        </TabPanel>
+      </TabView>
     </>
   );
 };

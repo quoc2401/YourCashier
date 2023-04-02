@@ -20,7 +20,7 @@ const GroupView: FC = () => {
 
   const header = () => {
     return (
-      <div className="flex justify-between items-center px-2">
+      <div className="flex flex-col sm:flex-row gap-2 justify-between items-start sm:items-center px-2">
         <Button
           label="Create new group"
           icon="pi pi-plus"
@@ -28,13 +28,14 @@ const GroupView: FC = () => {
           onClick={() => setOpenModalGroup(true)}
         />
 
-        <div className="flex">
-          <span className="p-input-icon-left">
+        <div className="flex w-full sm:w-2/4 lg:w-1/4">
+          <span className="p-input-icon-left w-full">
             <i className="pi pi-search" />
 
             <InputText
-              className="rounded-md"
-              placeholder="Search group name "
+              className="rounded-md w-full"
+              placeholder="Search group name"
+              maxLength={200}
             />
           </span>
         </div>

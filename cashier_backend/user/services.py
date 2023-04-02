@@ -9,6 +9,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import User, CashierGroup
 from oauth2_provider.models import AccessToken
+from expense.serializers import ExpenseSerializer
+from income.serializers import IncomeSerializer
 
 
 class UserServices:
@@ -17,6 +19,7 @@ class UserServices:
         password = request.data["password"]
         if username and password:
             domain = Site.objects.get_current().domain
+
             url = "{protocol}{domain}/{path}".format(protocol=config("PROTOCOL"), domain=domain, path="o/token/")
             data = {
                 "username": username,
@@ -26,12 +29,13 @@ class UserServices:
                 "client_secret": config("OAUTH_CLIENT_SECRET"),
             }
             res = requests.post(url=url, data=data)
-            print(res.json())
+            if res.status_code == 400:
+                return Response(data={"error": "Username or password invalid"}, status=res.status_code)
             if res.status_code == 200:
                 user = User.objects.get(username=username)
                 data = {**(res.json()), "user": RebuildUrlUserSerializer(user.__dict__).data}
                 return Response(data=data, status=status.HTTP_200_OK)
-            return Response(status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response("errors: username and password are required", status.HTTP_400_BAD_REQUEST)
 
     def signup(request):
@@ -79,3 +83,15 @@ class UserServices:
                 return Response(status=status.HTTP_200_OK)
             return Response(status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response("errors: refresh_token is required", status.HTTP_400_BAD_REQUEST)
+
+    def get_expenses(self):
+        u = self.get_object()
+        expenses = u.expenses.filter(is_active=True)
+
+        return Response(data=ExpenseSerializer(expenses, many=True).data, status=status.HTTP_200_OK)
+
+    def get_incomes(self):
+        u = self.get_object()
+        incomes = u.incomes.filter(is_active=True)
+
+        return Response(data=IncomeSerializer(incomes, many=True).data, status=status.HTTP_200_OK)

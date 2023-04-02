@@ -5,6 +5,8 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Expense } from "@/utils/responseInterfaces";
+import { moneyBodyTemplate } from "./components/templates";
+import { API_USER } from "@/services/axiosClient";
 
 const fakeData: Array<Expense> = [{
   amount: 500000,
@@ -21,6 +23,7 @@ const fakeData: Array<Expense> = [{
 }]
 
 const ExpenseView: FC = () => {
+  const currentUser = useStore((state) => state.currentUser);
   const [expenses, setExpenses] = useState<Array<Expense>>([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -34,8 +37,14 @@ const ExpenseView: FC = () => {
   const [openModalGroup, setOpenModalGroup] = useState(false);
   
   useEffect(() => {
-    setExpenses(fakeData)
+    loadExpenses()
   }, [])
+
+  const loadExpenses = async () => {
+    const res = await API_USER.API_USER.apiGetExpenses(currentUser?.id)
+    const data = res.data
+    setExpenses(data)
+  }
   
   const header = () => {
     return (
@@ -72,6 +81,7 @@ const ExpenseView: FC = () => {
     );
   };
 
+
   return (
     <>
       <div className="px-4">
@@ -106,6 +116,7 @@ const ExpenseView: FC = () => {
           field="amount"
           header="Money Amount"
           style={{ minWidth: "14rem" }}
+          body={moneyBodyTemplate}
         />
 
         <Column field="created_date" header="Created Date" style={{ minWidth: "10rem" }} />

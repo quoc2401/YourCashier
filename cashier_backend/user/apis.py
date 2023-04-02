@@ -29,11 +29,12 @@ class UserViewSet(
 ):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    pagination_class = Paginator
     parser_classes = [parsers.MultiPartParser]
     permission_classes = [permissions.IsAuthenticated]
 
     def get_permissions(self):
-        if self.action in ["login", "signup"]:
+        if self.action in ["login", "signup", "groups"]:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
@@ -45,9 +46,13 @@ class UserViewSet(
     def get_queryset(self):
         q = self.queryset
         kw = self.request.query_params.get("kw")
+        new_page_size = self.request.query_params.get("page_size")
 
         if kw:
             q = q.filter(Q(first_name__icontains=kw) | Q(last_name__icontains=kw))
+
+        if new_page_size:
+            self.pagination_class.page_size = new_page_size
 
         return q
 

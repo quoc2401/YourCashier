@@ -13,3 +13,13 @@ export interface User {
   last_login?: string;
   profile_picture?: string;
 }
+
+export interface Group {
+  id?: number;
+  supervisor: User;
+  users: Array<User>;
+  created_date: string;
+  updated_date: string;
+  is_active: boolean;
+  name: string;
+}

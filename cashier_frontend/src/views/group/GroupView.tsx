@@ -1,22 +1,53 @@
-import { FC, useState } from "react";
+import { FC, useState, useEffect, useRef } from "react";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import ModalCreateGroup from "./components/ModalCreateGroup";
+import { API_GROUP } from "@/services/axiosClient";
+import { Group } from "@/utils/response_interfaces";
+import { useStore } from "@/services/stores";
 
 const GroupView: FC = () => {
+  const currentUser = useStore((state) => state.currentUser);
   const [groups, setGroups] = useState([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [lazyState, setlazyState] = useState({
+  const [filters, setFilter] = useState("");
+  const lazyTimeOut = useRef<ReturnType<typeof setTimeout>>();
+  const [lazyState, setLazyState] = useState({
     first: 0,
     rows: 10,
     page: 1,
-    sortField: null,
-    sortOrder: null,
   });
   const [openModalGroup, setOpenModalGroup] = useState(false);
+
+  useEffect(() => {
+    lazyTimeOut.current = setTimeout(async () => {
+      loadGroups();
+    }, 500);
+    return () => clearTimeout(lazyTimeOut.current);
+  }, [lazyState, filters]);
+
+  const loadGroups = async () => {
+    setLoading(true);
+
+    const res = await API_GROUP.API_GROUP.apiGetGroupByUser(
+      currentUser?.id,
+      lazyState,
+      filters
+    );
+
+    console.log(res);
+
+    setGroups(res.data);
+    setTotalRecords(10);
+    setLoading(false);
+  };
+
+  const onPageChange = (e: any) => {
+    setLazyState(e);
+  };
 
   const header = () => {
     return (
@@ -33,9 +64,11 @@ const GroupView: FC = () => {
             <i className="pi pi-search" />
 
             <InputText
+              value={filters}
               className="rounded-md w-full"
               placeholder="Search group name"
               maxLength={200}
+              onChange={(e) => setFilter(e.target.value)}
             />
           </span>
         </div>
@@ -70,7 +103,7 @@ const GroupView: FC = () => {
         value={groups}
         paginator
         dataKey="id"
-        rows={10}
+        rows={lazyState.rows}
         rowsPerPageOptions={[10, 20, 50, 100]}
         totalRecords={totalRecords}
         loading={loading}
@@ -81,8 +114,9 @@ const GroupView: FC = () => {
         responsiveLayout="scroll"
         size="small"
         rowHover
+        onPage={onPageChange}
       >
-        <Column field="order" style={{ minWidth: "8rem", width: "8rem" }} />
+        <Column style={{ minWidth: "8rem", width: "8rem" }} />
 
         <Column
           field="name"
@@ -90,25 +124,24 @@ const GroupView: FC = () => {
           style={{ minWidth: "14rem" }}
         />
 
-        <Column
+        {/* <Column
           field="supervisor"
           header="Leader"
           style={{ minWidth: "14rem" }}
-        />
-
-        <Column field="income" header="Income" style={{ minWidth: "10rem" }} />
+        /> */}
 
         <Column
-          field="expense"
-          header="Expense"
-          style={{ minWidth: "10rem" }}
+          field="created_date"
+          header="Create date"
+          style={{ minWidth: "14rem" }}
         />
 
-        <Column
-          field="id"
+        {/* <Column
+          field="users"
+          header="Members"
           body={actionBodyTemplate}
           style={{ minWidth: "6rem" }}
-        />
+        /> */}
       </DataTable>
     </>
   );

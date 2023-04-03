@@ -6,19 +6,36 @@ import IncomeView from "./IncomeView";
 import { TabView, TabPanel } from "primereact/tabview";
 import { API_USER } from "@/services/axiosClient";
 import { formatCurrency } from "@/utils";
+import { Calendar } from "primereact/calendar";
 
 const UserView: FC = () => {
   const [totalIncome, setTotalIncome] = useState(0)
   const [totalExpense, setTotalExpense] = useState(0)
   const [totalDifference, setTotalDifference] = useState(0)
+  const [date, setDate] = useState<Date | Date[] | undefined>(undefined);
+  const [lazyParams, setLazyParams] = useState({
+    fromDate: null,
+    toDate: null,
+  })
   
   useEffect(() => {
-    loadTotals()
-  }, [])
+    const timeOut = setTimeout(() => loadTotals(), 300)
+    return () => clearTimeout(timeOut)
+  }, [lazyParams])
+
+  useEffect(() => {
+      setLazyParams(prev => {
+        const _lazyParams = {
+          fromDate: date ? date[0] : null,
+          toDate: date ? date[1] : null,
+        }
+        return _lazyParams
+      })
+  }, [date])
 
   const loadTotals = async () => {
     try {
-      const res = await API_USER.API_USER.apiGetTotal()
+      const res = await API_USER.API_USER.apiGetTotal(lazyParams)
       const data = res.data
 
       setTotalIncome(data.totalIncome)
@@ -28,41 +45,6 @@ const UserView: FC = () => {
       console.log(error)
     }
   }
-
-  const header = () => {
-    return (
-      <div className="flex justify-between items-center px-2">
-        <Button
-          label="Create new group"
-          icon="pi pi-plus"
-          className="font-semibold p-button-primary"
-          onClick={() => setOpenModalGroup(true)}
-        />
-
-        <div className="flex">
-          <span className="p-input-icon-left">
-            <i className="pi pi-search" />
-
-            <InputText
-              className="rounded-md"
-              placeholder="Search group name "
-            />
-          </span>
-        </div>
-      </div>
-    );
-  };
-
-  const actionBodyTemplate = () => {
-    return (
-      <div className="">
-        <Button
-          icon="pi pi-pencil"
-          className="p-button-rounded p-button-text"
-        />
-      </div>
-    );
-  };
 
   return (
     <>
@@ -92,11 +74,11 @@ const UserView: FC = () => {
       </div>
       <TabView>
         <TabPanel header="Incomes">
-          <IncomeView />
+          <IncomeView date={date} setDate={setDate}/>
         </TabPanel>
 
         <TabPanel header="Expenses">
-          <ExpenseView /> 
+          <ExpenseView date={date} setDate={setDate}/> 
         </TabPanel>
       </TabView>
     </>

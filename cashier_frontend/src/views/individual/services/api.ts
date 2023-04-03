@@ -50,8 +50,15 @@ class ApiUser {
         return axiosClient.delete(`expenses/${id}/`)
     }
 
-    apiGetTotal: any = () => {
-        return axiosClient.get("users/total_stats/")
+    apiGetTotal: any = (params: any) => {
+        const queryParams = params
+        ? Object.keys(params)
+            .map(
+              k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k])
+            )
+            .join('&')
+        : ''
+        return axiosClient.get(`users/total_stats/?${queryParams}`)
     }
 }
 

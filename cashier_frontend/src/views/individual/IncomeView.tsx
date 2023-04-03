@@ -14,8 +14,14 @@ import { useFormik } from "formik";
 import { Income as RIncome } from "@/utils/requestInterfaces";
 import TextEditor from "./components/TextEditor";
 import NumberEditor from "./components/NumberEditor";
+import { Calendar } from "primereact/calendar";
 
-const IncomeView: FC = () => {
+interface IncomeViewProps {
+  date: Date | Date[] | undefined
+  setDate: (date: Date | Date[] | undefined) => void
+}
+
+const IncomeView: FC<IncomeViewProps> = ({date, setDate}) => {
   const currentUser = useStore((state) => state.currentUser);
   const [incomes, setIncomes] = useState<Array<Income>>([]);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -27,12 +33,27 @@ const IncomeView: FC = () => {
     page: 1,
     page_size: 10,
     kw: "",
+    fromDate: null,
+    toDate: null,
   });
 
   useEffect(() => {
     const timeOut = setTimeout(() => loadIncomes(), 300)
     return () => clearTimeout(timeOut)
   }, [lazyParams])
+
+  useEffect(() => {
+      setLazyParams(prev => {
+        const _lazyParams = {
+          ...prev,
+          first: 0,
+          page: 1,
+          fromDate: date ? date[0] : null,
+          toDate: date ? date[1] : null,
+        }
+        return _lazyParams
+      })
+  }, [date])
 
   const loadIncomes = async () => {
     try {
@@ -94,7 +115,24 @@ const IncomeView: FC = () => {
           icon="pi pi-plus"
           className="font-semibold p-button-primary"
           onClick={() => setOpenModalIncome(true)}
+        />   
+        <Calendar
+          value={date}
+          v-model="filterParams.search.orderDate"
+          touchUI={false}
+          selectionMode="range"
+          className="w-full sm:w-2/4 lg:w-1/4 ml-auto mr-4"
+          dateFormat="dd/mm/yy"
+          placeholder="From date - To date"
+          readOnlyInput
+          onChange={(e) => setDate(e.value)}
         />
+        <span className="p-input-icon-right">
+          <i 
+            className={`pi pi-times ${date == null ? "hidden": ""} cursor-pointer mr-5`}
+            onClick={() => setDate(undefined)}
+          />
+        </span>
 
         <div className="flex">
           <span className="p-input-icon-left">

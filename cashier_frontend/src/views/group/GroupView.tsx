@@ -89,7 +89,7 @@ const GroupView: FC = () => {
           selectionMode="range"
           className="w-full sm:w-2/4 lg:w-1/4 ml-auto"
           dateFormat="dd/mm/yy"
-          placeholder="Từ ngày - Đến ngày"
+          placeholder="From date - To date"
           readOnlyInput
           onChange={(e) => setDate(e.value)}
         />

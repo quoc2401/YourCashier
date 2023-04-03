@@ -58,9 +58,7 @@ class RebuildUrlUserSerializer(UserSerializer):
     def get_profile_picture(self, user):
         domain = Site.objects.get_current().domain
         path = "/static/" + user["profile_picture"]
-        print(path)
         path = path.replace("//", "/")
-        print(path)
         url = "http://{domain}{path}".format(domain=domain, path=path)
         return url
 

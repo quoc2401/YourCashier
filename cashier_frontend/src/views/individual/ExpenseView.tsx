@@ -5,15 +5,22 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Expense } from "@/utils/responseInterfaces";
-import { deleteBodyTemplate, moneyBodyTemplate } from "./components/templates";
+import { dateBodyTemplate, deleteBodyTemplate, moneyBodyTemplate } from "./components/templates";
 import { API_USER } from "@/services/axiosClient";
 import { toast } from "react-toastify";
 import { useFormik } from "formik";
 import { Expense as RExpense } from "@/utils/requestInterfaces";
 import * as Yup from 'yup'
 import CreateFormModal from "./components/CreateFormModal";
+import { Calendar } from "primereact/calendar";
 
-const ExpenseView: FC = () => {
+interface ExpenseViewProps {
+  date: Date | Date[] | undefined
+  setDate: (date: Date | Date[] | undefined) => void
+}
+
+
+const ExpenseView: FC<ExpenseViewProps> = ({date, setDate}) => {
   const currentUser = useStore((state) => state.currentUser);
   const [expenses, setExpenses] = useState<Array<Expense>>([]);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -24,6 +31,8 @@ const ExpenseView: FC = () => {
     page: 1,
     page_size: 10,
     kw: "",
+    fromDate: null,
+    toDate: null,
   });
   const [openModal, setOpenModal] = useState(false);
   
@@ -32,6 +41,21 @@ const ExpenseView: FC = () => {
 
     return () => clearTimeout(timeOut)
   }, [lazyParams])
+
+  
+  useEffect(() => {
+      setLazyParams(prev => {
+        const _lazyParams = {
+          ...prev,
+          first: 0,
+          page: 1,
+          fromDate: date ? date[0] : null,
+          toDate: date ? date[1] : null,
+        }
+        return _lazyParams
+      })
+  }, [date])
+
 
   const loadExpenses = async () => {
     try {
@@ -95,6 +119,24 @@ const ExpenseView: FC = () => {
           className="font-semibold p-button-primary"
           onClick={() => setOpenModal(true)}
         />
+
+        <Calendar
+          value={date}
+          v-model="filterParams.search.orderDate"
+          touchUI={false}
+          selectionMode="range"
+          className="w-full sm:w-2/4 lg:w-1/4 ml-auto mr-4"
+          dateFormat="dd/mm/yy"
+          placeholder="From date - To date"
+          readOnlyInput
+          onChange={(e) => setDate(e.value)}
+        />
+        <span className="p-input-icon-right">
+          <i 
+            className={`pi pi-times ${date == null ? "hidden": ""} cursor-pointer mr-5`}
+            onClick={() => setDate(undefined)}
+          />
+        </span>
 
         <div className="flex">
           <span className="p-input-icon-left">
@@ -254,7 +296,7 @@ const ExpenseView: FC = () => {
           body={moneyBodyTemplate}
         />
 
-        <Column field="created_date" header="Created Date" style={{ minWidth: "10rem" }} />
+        <Column field="created_date" header="Created Date" style={{ minWidth: "10rem" }} body={dateBodyTemplate}/>
         <Column
           rowEditor
           className="min-w-[6rem] w-[8%]"

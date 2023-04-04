@@ -48,7 +48,7 @@ const ExpenseView: FC<ExpenseViewProps> = ({date, setDate}) => {
         const _lazyParams = {
           ...prev,
           first: 0,
-          page: 1,
+          page: 1,  
           fromDate: date ? date[0] : null,
           toDate: date ? date[1] : null,
         }

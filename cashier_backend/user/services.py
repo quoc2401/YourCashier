@@ -115,20 +115,20 @@ class UserServices:
         from_date = self.request.query_params.get("fromDate")
         to_date = self.request.query_params.get("toDate")
 
-        expenses = u.expenses.filter(is_active=True)
+        expenses = u.expenses.filter(is_active=True, group_expense=None)
         if kw:
             expenses = expenses.filter(description__icontains=kw)
 
-        if from_date == "null" or from_date == "undefined":
-            from_date = None
-        if to_date == "null" or to_date == "undefined":
-            to_date = None
-        if from_date:
+        if not from_date or from_date in ("undefined", "null"):
+            from_date = datetime.now().replace(day=1, hour=0)
+        else:
             from_date = urllib.parse.unquote(from_date)
             from_date = datetime.strptime(from_date[: from_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z").strftime(
                 "%Y-%m-%d %H:%M:%S"
             )
-            expenses = expenses.filter(created_date__gte=from_date)
+
+        if not to_date or to_date in ("undefined", "null"):
+            to_date = None
         if to_date:
             to_date = urllib.parse.unquote(to_date)
             to_date = datetime.strptime(to_date[: to_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z").strftime(
@@ -136,6 +136,7 @@ class UserServices:
             )
             expenses = expenses.filter(created_date__lte=to_date)
 
+        expenses = expenses.filter(created_date__gte=from_date)
         paginated_expenses = self.paginate_queryset(expenses)
 
         return self.get_paginated_response(ExpenseSerializer(paginated_expenses, many=True).data)
@@ -147,26 +148,24 @@ class UserServices:
         from_date = self.request.query_params.get("fromDate")
         to_date = self.request.query_params.get("toDate")
 
-        incomes = u.incomes.filter(is_active=True)
+        incomes = u.incomes.filter(is_active=True, group_income=None)
         if kw:
             incomes = incomes.filter(description__icontains=kw)
 
-        if from_date == "null" or from_date == "undefined":
-            from_date = None
-        if to_date == "null" or to_date == "undefined":
-            to_date = None
-        if from_date:
+        if not from_date or from_date in ("undefined", "null"):
+            from_date = datetime.now().replace(day=1, hour=0)
+        else:
             from_date = urllib.parse.unquote(from_date)
             from_date = datetime.strptime(from_date[: from_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
-            # .strftime(
-            #     "%Y-%m-%d %H:%M:%S"
-            # )
-            incomes = incomes.filter(created_date__gte=from_date)
+
+        if not to_date or to_date in ("undefined", "null"):
+            to_date = None
         if to_date:
             to_date = urllib.parse.unquote(to_date)
             to_date = datetime.strptime(to_date[: to_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
             incomes = incomes.filter(created_date__lte=to_date)
 
+        incomes = incomes.filter(created_date__gte=from_date)
         paginated_incomes = self.paginate_queryset(incomes)
 
         return self.get_paginated_response(IncomeSerializer(paginated_incomes, many=True).data)
@@ -176,26 +175,26 @@ class UserServices:
         from_date = self.request.query_params.get("fromDate")
         to_date = self.request.query_params.get("toDate")
 
-        if from_date == "null" or from_date == "undefined":
-            from_date = datetime.now().replace(day=1)
+        if not from_date or from_date in ("undefined", "null"):
+            from_date = datetime.now().replace(day=1, hour=0)
         else:
             from_date = urllib.parse.unquote(from_date)
             from_date = datetime.strptime(from_date[: from_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
 
-        if to_date == "null" or to_date == "undefined":
+        if not to_date or to_date in ("undefined", "null"):
             to_date = datetime.now()
         else:
             to_date = urllib.parse.unquote(to_date)
             to_date = datetime.strptime(to_date[: to_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
 
         try:
-            total_income = Income.objects.filter(created_date__range=[from_date, to_date], user_id=user_id).aggregate(
-                total=Sum("amount")
-            )["total"]
+            total_income = Income.objects.filter(
+                created_date__range=[from_date, to_date], user_id=user_id, is_active=True, group_income=None
+            ).aggregate(total=Sum("amount"))["total"]
 
-            total_expense = Expense.objects.filter(created_date__range=[from_date, to_date], user_id=user_id).aggregate(
-                total=Sum("amount")
-            )["total"]
+            total_expense = Expense.objects.filter(
+                created_date__range=[from_date, to_date], user_id=user_id, is_active=True, group_expense=None
+            ).aggregate(total=Sum("amount"))["total"]
 
             if not total_income:
                 total_income = 0

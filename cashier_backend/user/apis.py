@@ -35,10 +35,10 @@ class UserViewSet(
     pagination_class = Paginator
 
     def get_permissions(self):
-        if self.action in ["login", "signup", "list"]:
+        if self.action in ["login", "signup"]:
             return [permissions.AllowAny()]
-        # if self.action in ["list"]:
-        #     return [IsAdmin()]
+        if self.action in ["list", "active"]:
+            return [IsAdmin()]
         return self.permission_classes
 
     def get_serializer_class(self):
@@ -49,7 +49,7 @@ class UserViewSet(
     def get_queryset(self):
         q = self.queryset
         kw = self.request.query_params.get("kw")
-        new_page_size = self.request.query_params.get("page_size")
+        new_page_size = self.request.query_params.get("pageSize")
 
         if kw:
             if self.action not in ["expenses", "incomes"]:
@@ -102,6 +102,16 @@ class UserViewSet(
     def total_stats(self, request):
         return UserServices.get_totals(self, request)
 
+    @action(
+        methods=["PATCH"],
+        detail=False,
+        url_path="active",
+        serializer_class=[],
+        parser_classes=[parsers.JSONParser],
+    )
+    def active(self, request):
+        return UserServices.active(self, request)
+
 
 class CashierGroupViewSet(
     viewsets.ViewSet,
@@ -118,7 +128,7 @@ class CashierGroupViewSet(
     def get_queryset(self):
         q = self.queryset
         kw = self.request.query_params.get("kw")
-        new_page_size = self.request.query_params.get("page_size")
+        new_page_size = self.request.query_params.get("pageSize")
 
         if kw:
             q = q.filter(Q(name__icontains=kw))

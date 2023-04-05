@@ -4,6 +4,7 @@ import axios from "axios";
 export * as API_ACCOUNT from "@/views/account/services/api";
 export * as API_GROUP from "@/views/group/services/api";
 export * as API_USER from "@/views/individual/services/api";
+export * as API_ADMIN from "@/views/admin/services/api"
 
 const axiosClient = axios.create({
   baseURL: `${import.meta.env.VITE_APP_API_URL}`,

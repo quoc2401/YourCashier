@@ -4,13 +4,13 @@ import axios from "@/services/axiosClient";
 class ApiGroup {
   apiGetAllUsers = (params: any, filter: string) => {
     return axios.get(
-      `users/?page=${params.page}&page_size=${params.rows}&kw=${filter}`
+      `users/?page=${params.page}&pageSize=${params.rows}&kw=${filter}`
     );
   };
 
   apiGetGroupByUser = (id: number | undefined, params: any, filter: string) => {
     return axios.get(
-      `users/${id}/groups/?page=${params.page}&page_size=${params.rows}&kw=${filter}`
+      `users/${id}/groups/?page=${params.page}&pageSize=${params.rows}&kw=${filter}`
     );
   };
 

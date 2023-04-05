@@ -1,5 +1,4 @@
 import { SignInUser, SignUpUser } from "@/utils/requestInterfaces";
-import { User } from "@/utils/responseInterfaces";
 import axios from "@/services/axiosClient"
   
 class ApiAuth {

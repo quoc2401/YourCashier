@@ -31,7 +31,7 @@ const IncomeView: FC<IncomeViewProps> = ({date, setDate}) => {
   const [lazyParams, setLazyParams] = useState({
     first: 0,
     page: 1,
-    page_size: 10,
+    pageSize: 10,
     kw: "",
     fromDate: null,
     toDate: null,
@@ -185,7 +185,7 @@ const IncomeView: FC<IncomeViewProps> = ({date, setDate}) => {
       const _lazyParams = {
         ...lazyParams,
         page: e.page + 1,
-        page_size: e.rows,
+        pageSize: e.rows,
         first: e.first,
       }
       return _lazyParams
@@ -256,7 +256,7 @@ const IncomeView: FC<IncomeViewProps> = ({date, setDate}) => {
         value={incomes}
         paginator
         dataKey="id"
-        rows={lazyParams.page_size}
+        rows={lazyParams.pageSize}
         rowsPerPageOptions={[10, 20, 50, 100]}
         totalRecords={totalRecords}
         loading={loading}

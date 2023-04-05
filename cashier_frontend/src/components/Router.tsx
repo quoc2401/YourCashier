@@ -42,13 +42,17 @@ const Router: FC = () => {
     },
     {
       path: "/admin",
-      element: <Admin />,
+      element: (
+      <PrivateRoute>
+        <Admin />
+      </PrivateRoute>
+      ),
       children: [
         {
           element: <Dashboard />,
         },
         {
-          path: "user-account",
+          path: "users-administration",
           element: <UserAccountList />,
         },
       ],

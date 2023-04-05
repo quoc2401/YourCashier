@@ -29,7 +29,7 @@ const ExpenseView: FC<ExpenseViewProps> = ({date, setDate}) => {
   const [lazyParams, setLazyParams] = useState({
     first: 0,
     page: 1,
-    page_size: 10,
+    pageSize: 10,
     kw: "",
     fromDate: null,
     toDate: null,
@@ -189,7 +189,7 @@ const ExpenseView: FC<ExpenseViewProps> = ({date, setDate}) => {
       const _lazyParams = {
         ...lazyParams,
         page: e.page + 1,
-        page_size: e.rows,
+        pageSize: e.rows,
         first: e.first,
       }
 
@@ -263,7 +263,7 @@ const ExpenseView: FC<ExpenseViewProps> = ({date, setDate}) => {
         value={expenses}
         paginator
         dataKey="id"
-        rows={lazyParams.page_size}
+        rows={lazyParams.pageSize}
         rowsPerPageOptions={[10, 20, 50, 100]}
         totalRecords={totalRecords}
         loading={loading}

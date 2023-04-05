@@ -208,3 +208,9 @@ class UserServices:
             )
         except TypeError:
             return Response(data={"error": "an error occurred"}, status=status.HTTP_404_NOT_FOUND)
+
+    def active(self, request):
+        u = User.objects.get(uuid=request.data["uuid"])
+        u.is_active = not u.is_active
+
+        return Response(data=RebuildUrlUserSerializer(u.__dict__).data)

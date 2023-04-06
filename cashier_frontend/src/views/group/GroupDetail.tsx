@@ -21,15 +21,52 @@ const GroupDetail: FC = () => {
   const [group, setGroup] = useState<Group | null>(null);
   const [loading, setLoading] = useState(false);
   const [groupMember, setGroupMember] = useState<Array<User>>([]);
+  const [date, setDate] = useState<Date | Date[] | undefined>(undefined);
   const [expensesApproved, setExpensesApproved] = useState<Array<GroupExpense>>(
     []
   );
   const [isOpenedSideBarMember, setIsOpenedSideBarMember] = useState(false);
   const [isOpenedSideBarApproved, setIsOpenedSideBarApproved] = useState(false);
+  const [totalIncome, setTotalIncome] = useState(0);
+  const [totalExpense, setTotalExpense] = useState(0);
+  const [totalDifference, setTotalDifference] = useState(0);
+  const [lazyParams, setLazyParams] = useState({
+    fromDate: null,
+    toDate: null,
+  });
 
   useEffect(() => {
     loadGroupDetails();
   }, []);
+
+  useEffect(() => {
+    loadTotals();
+  }, [lazyParams]);
+
+  useEffect(() => {
+    setLazyParams((prev) => {
+      const _lazyParams = {
+        fromDate: date ? date[0] : null,
+        toDate: date ? date[1] : null,
+      };
+      return _lazyParams;
+    });
+  }, [date]);
+
+  const loadTotals = async () => {
+    try {
+      const { data } = await API_GROUP.API_GROUP.apiGetTotal(
+        params.groupId,
+        lazyParams
+      );
+
+      setTotalIncome(data.totalIncome);
+      setTotalExpense(data.totalExpense);
+      setTotalDifference(data.totalDifference);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const loadGroupDetails = async () => {
     const { data: res } = await API_GROUP.API_GROUP.apiGetGroupDetail(
@@ -151,7 +188,9 @@ const GroupDetail: FC = () => {
 
       <div className="p-4 border border-slate-200 bg-slate-50 flex items-center">
         <div className="flex flex-col justify-center items-center flex-1">
-          <div className="text-green-500 text-xl font-bold">$1355.0</div>
+          <div className="text-green-500 text-xl font-bold">
+            {formatCurrency(totalIncome)}
+          </div>
 
           <div className="">total income</div>
         </div>
@@ -159,7 +198,9 @@ const GroupDetail: FC = () => {
         <i className="pi pi-angle-right text-2xl text-slate-500" />
 
         <div className="flex flex-col justify-center items-center flex-1">
-          <div className="text-red-500 text-xl font-bold">$1355.0</div>
+          <div className="text-red-500 text-xl font-bold">
+            {formatCurrency(totalExpense)}
+          </div>
 
           <div className="">total expense</div>
         </div>
@@ -167,7 +208,13 @@ const GroupDetail: FC = () => {
         <i className="pi pi-angle-right text-2xl text-slate-500" />
 
         <div className="flex flex-col justify-center items-center flex-1">
-          <div className="text-red-500 text-xl font-bold">-$1355.0</div>
+          <div
+            className={`${
+              totalIncome < totalExpense ? "text-red-500" : "text-green-500"
+            } text-xl font-bold`}
+          >
+            {formatCurrency(totalDifference)}
+          </div>
 
           <div className="">total difference</div>
         </div>
@@ -175,10 +222,18 @@ const GroupDetail: FC = () => {
 
       <TabView>
         <TabPanel header="Income">
-          <GroupIncome adminId={group?.supervisor.id} />
+          <GroupIncome
+            adminId={group?.supervisor.id}
+            date={date}
+            setDate={setDate}
+          />
         </TabPanel>
         <TabPanel header="Expense">
-          <GroupExpenses adminId={group?.supervisor.id} />
+          <GroupExpenses
+            adminId={group?.supervisor.id}
+            date={date}
+            setDate={setDate}
+          />
         </TabPanel>
       </TabView>
 

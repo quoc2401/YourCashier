@@ -17,9 +17,15 @@ import CreateFormModal from "./CreateFormModal";
 
 interface GroupExpensesProps {
   adminId: any;
+  date: Date | Date[] | undefined;
+  setDate: (date: Date | Date[] | undefined) => void;
 }
 
-export const GroupExpenses: FC<GroupExpensesProps> = ({ adminId }) => {
+export const GroupExpenses: FC<GroupExpensesProps> = ({
+  adminId,
+  date,
+  setDate,
+}) => {
   const currentUser = useStore((state) => state.currentUser);
   const [expenses, setExpenses] = useState<Array<GroupExpense>>([]);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -27,12 +33,13 @@ export const GroupExpenses: FC<GroupExpensesProps> = ({ adminId }) => {
   const [filters, setFilter] = useState("");
   const [openModalExpense, setOpenModalExpense] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [date, setDate] = useState<Date | Date[] | undefined>(undefined);
   const lazyTimeOut = useRef<ReturnType<typeof setTimeout>>();
   const [lazyState, setLazyState] = useState({
     first: 0,
     rows: 10,
     page: 1,
+    fromDate: null,
+    toDate: null,
   });
   const firstUpdate = useRef<any>(null);
   const params = useParams();
@@ -55,6 +62,19 @@ export const GroupExpenses: FC<GroupExpensesProps> = ({ adminId }) => {
   useEffect(() => {
     formik.resetForm();
   }, [openModalExpense]);
+
+  useEffect(() => {
+    setLazyState((prev) => {
+      const _lazyParams = {
+        ...prev,
+        first: 0,
+        page: 1,
+        fromDate: date ? date[0] : null,
+        toDate: date ? date[1] : null,
+      };
+      return _lazyParams;
+    });
+  }, [date]);
 
   const loadGroups = async () => {
     setLoading(true);

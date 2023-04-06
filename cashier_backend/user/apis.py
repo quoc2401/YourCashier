@@ -18,6 +18,9 @@ from decouple import config
 from django.db.models import Q
 from .services import UserServices
 from cashier_backend.paginators import Paginator
+import urllib.parse
+from datetime import datetime
+from django.db.models import Sum
 
 
 class UserViewSet(
@@ -35,10 +38,10 @@ class UserViewSet(
     pagination_class = Paginator
 
     def get_permissions(self):
-        if self.action in ["login", "signup", "list"]:
+        if self.action in ["login", "signup"]:
             return [permissions.AllowAny()]
-        # if self.action in ["list"]:
-        #     return [IsAdmin()]
+        if self.action in ["active"]:
+            return [IsAdmin()]
         return self.permission_classes
 
     def get_serializer_class(self):
@@ -49,7 +52,7 @@ class UserViewSet(
     def get_queryset(self):
         q = self.queryset
         kw = self.request.query_params.get("kw")
-        new_page_size = self.request.query_params.get("page_size")
+        new_page_size = self.request.query_params.get("pageSize")
 
         if kw:
             if self.action not in ["expenses", "incomes"]:
@@ -78,11 +81,29 @@ class UserViewSet(
     @action(methods=["GET"], detail=True)
     def groups(self, request, pk):
         user = User.objects.get(pk=pk)
-        groups = user.cashier_groups.filter(is_active=True)
         kw = self.request.query_params.get("kw")
+        # from_date = self.request.query_params.get("fromDate")
+        # to_date = self.request.query_params.get("toDate")
+
+        groups = user.cashier_groups.filter(is_active=True)
 
         if kw:
             groups = groups.filter(name__icontains=kw)
+
+        # if not from_date or from_date in ("undefined", "null"):
+        #     from_date = datetime.now().replace(day=1, hour=0)
+        # else:
+        #     from_date = urllib.parse.unquote(from_date)
+        #     from_date = datetime.strptime(from_date[: from_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
+
+        # if not to_date or to_date in ("undefined", "null"):
+        #     to_date = None
+        # if to_date:
+        #     to_date = urllib.parse.unquote(to_date)
+        #     to_date = datetime.strptime(to_date[: to_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
+        #     groups = groups.filter(created_date__lte=to_date)
+
+        # groups = groups.filter(created_date__gte=from_date)
         paginated_incomes = self.paginate_queryset(groups)
 
         return self.get_paginated_response(CashierGroupSerializer(paginated_incomes, many=True).data)
@@ -102,6 +123,16 @@ class UserViewSet(
     def total_stats(self, request):
         return UserServices.get_totals(self, request)
 
+    @action(
+        methods=["PATCH"],
+        detail=False,
+        url_path="active",
+        serializer_class=[],
+        parser_classes=[parsers.JSONParser],
+    )
+    def active(self, request):
+        return UserServices.active(self, request)
+
 
 class CashierGroupViewSet(
     viewsets.ViewSet,
@@ -114,11 +145,12 @@ class CashierGroupViewSet(
     queryset = CashierGroup.objects.all()
     serializer_class = CashierGroupSerializer
     pagination_class = Paginator
+    parser_classes = [parsers.MultiPartParser]
 
     def get_queryset(self):
         q = self.queryset
         kw = self.request.query_params.get("kw")
-        new_page_size = self.request.query_params.get("page_size")
+        new_page_size = self.request.query_params.get("pageSize")
 
         if kw:
             q = q.filter(Q(name__icontains=kw))
@@ -158,9 +190,26 @@ class CashierGroupViewSet(
     def expenses_approved(self, request, pk):
         group_expenses = GroupExpense.objects.filter(cashier_group_id=pk, is_approved=True, expense__is_active=True)
         kw = self.request.query_params.get("kw")
+        # from_date = self.request.query_params.get("fromDate")
+        # to_date = self.request.query_params.get("toDate")
 
         if kw:
             group_expenses = group_expenses.filter(expense__description__icontains=kw)
+
+        # if not from_date or from_date in ("undefined", "null"):
+        #     from_date = datetime.now().replace(day=1, hour=0)
+        # else:
+        #     from_date = urllib.parse.unquote(from_date)
+        #     from_date = datetime.strptime(from_date[: from_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
+
+        # if not to_date or to_date in ("undefined", "null"):
+        #     to_date = None
+        # if to_date:
+        #     to_date = urllib.parse.unquote(to_date)
+        #     to_date = datetime.strptime(to_date[: to_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
+        #     group_expenses = group_expenses.filter(expense__created_date__lte=to_date)
+
+        # group_expenses = group_expenses.filter(expense__created_date__gte=from_date)
         paginated_expenses = self.paginate_queryset(group_expenses)
 
         return self.get_paginated_response(GroupExpenseSerializer(paginated_expenses, many=True).data)
@@ -169,9 +218,67 @@ class CashierGroupViewSet(
     def income(self, request, pk):
         group_income = GroupIncome.objects.filter(cashier_group_id=pk, income__is_active=True)
         kw = self.request.query_params.get("kw")
+        # from_date = self.request.query_params.get("fromDate")
+        # to_date = self.request.query_params.get("toDate")
 
         if kw:
             group_income = group_income.filter(Q(income__description__icontains=kw))
+
+        # if not from_date or from_date in ("undefined", "null"):
+        #     from_date = datetime.now().replace(day=1, hour=0)
+        # else:
+        #     from_date = urllib.parse.unquote(from_date)
+        #     from_date = datetime.strptime(from_date[: from_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z %z")
+
+        # if not to_date or to_date in ("undefined", "null"):
+        #     to_date = None
+        # if to_date:
+        #     to_date = urllib.parse.unquote(to_date)
+        #     to_date = datetime.strptime(to_date[: to_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z %z")
+        #     group_income = group_income.filter(income__created_date__lte=to_date)
+
+        # group_income = group_income.filter(income__created_date__gte=from_date)
         paginated_incomes = self.paginate_queryset(group_income)
 
         return self.get_paginated_response(GroupIncomeSerializer(paginated_incomes, many=True).data)
+
+    @action(methods=["GET"], detail=True)
+    def get_totals(self, request, pk):
+        from_date = self.request.query_params.get("fromDate")
+        to_date = self.request.query_params.get("toDate")
+
+        if not from_date or from_date in ("undefined", "null"):
+            from_date = datetime.now().replace(day=1, hour=0)
+        else:
+            from_date = urllib.parse.unquote(from_date)
+            from_date = datetime.strptime(from_date[: from_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
+
+        if not to_date or to_date in ("undefined", "null"):
+            to_date = datetime.now()
+        else:
+            to_date = urllib.parse.unquote(to_date)
+            to_date = datetime.strptime(to_date[: to_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
+
+        try:
+            total_income = GroupExpense.objects.filter(
+                expense__created_date__range=[from_date, to_date],
+                cashier_group=pk,
+            ).aggregate(total=Sum("expense__amount"))["total"]
+
+            total_expense = GroupIncome.objects.filter(
+                income__created_date__range=[from_date, to_date],
+                cashier_group=pk,
+            ).aggregate(total=Sum("income__amount"))["total"]
+
+            if not total_income:
+                total_income = 0
+            if not total_expense:
+                total_expense = 0
+
+            total_difference = total_income - total_expense
+
+            return Response(
+                data={"totalIncome": total_income, "totalExpense": total_expense, "totalDifference": total_difference}
+            )
+        except TypeError:
+            return Response(data={"error": "An error occurred"}, status=status.HTTP_404_NOT_FOUND)

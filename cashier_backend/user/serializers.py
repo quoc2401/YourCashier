@@ -14,7 +14,17 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("id", "uuid", "username", "first_name", "last_name", "email", "profile_picture")
+        fields = (
+            "id",
+            "uuid",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "profile_picture",
+            "created_date",
+            "is_active",
+        )
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -58,9 +68,7 @@ class RebuildUrlUserSerializer(UserSerializer):
     def get_profile_picture(self, user):
         domain = Site.objects.get_current().domain
         path = "/static/" + user["profile_picture"]
-        print(path)
         path = path.replace("//", "/")
-        print(path)
         url = "http://{domain}{path}".format(domain=domain, path=path)
         return url
 

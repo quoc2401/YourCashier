@@ -26,6 +26,8 @@ const GroupView: FC = () => {
     first: 0,
     rows: 10,
     page: 1,
+    fromDate: null,
+    toDate: null,
   });
   const [openModalGroup, setOpenModalGroup] = useState(false);
   const firstUpdate = useRef<any>(null);
@@ -44,6 +46,19 @@ const GroupView: FC = () => {
     }
     return () => clearTimeout(lazyTimeOut.current);
   }, [filters, date]);
+
+  useEffect(() => {
+    setLazyState((prev) => {
+      const _lazyParams = {
+        ...prev,
+        first: 0,
+        page: 1,
+        fromDate: date ? date[0] : null,
+        toDate: date ? date[1] : null,
+      };
+      return _lazyParams;
+    });
+  }, [date]);
 
   const loadGroups = async () => {
     setLoading(true);

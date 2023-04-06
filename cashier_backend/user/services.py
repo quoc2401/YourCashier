@@ -15,6 +15,9 @@ from datetime import datetime, date, timedelta
 from income.models import Income
 from expense.models import Expense
 from django.db.models import Sum
+import urllib.parse
+
+# from dateutil import parser
 
 
 class UserServices:
@@ -46,7 +49,25 @@ class UserServices:
         serializer = CreateUserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(RebuildUrlUserSerializer(serializer.data).data)
+            print(serializer.data)
+            username = request.data["username"]
+            password = request.data["password"]
+
+            domain = Site.objects.get_current().domain
+
+            url = "{protocol}{domain}/{path}".format(protocol=config("PROTOCOL"), domain=domain, path="o/token/")
+            data = {
+                "username": username,
+                "password": password,
+                "grant_type": config("OAUTH_GRANT_TYPE"),
+                "client_id": config("OAUTH_CLIENT_ID"),
+                "client_secret": config("OAUTH_CLIENT_SECRET"),
+            }
+            res = requests.post(url=url, data=data)
+            if res.status_code == 200:
+                data = {**(res.json()), "user": RebuildUrlUserSerializer(serializer.data).data}
+                return Response(data=data, status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(data={**serializer.errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
@@ -91,9 +112,31 @@ class UserServices:
     def get_expenses(self):
         u = self.get_object()
         kw = self.request.query_params.get("kw")
-        expenses = u.expenses.filter(is_active=True)
+        from_date = self.request.query_params.get("fromDate")
+        to_date = self.request.query_params.get("toDate")
+
+        expenses = u.expenses.filter(is_active=True, group_expense=None)
         if kw:
             expenses = expenses.filter(description__icontains=kw)
+
+        if not from_date or from_date in ("undefined", "null"):
+            from_date = datetime.now().replace(day=1, hour=0)
+        else:
+            from_date = urllib.parse.unquote(from_date)
+            from_date = datetime.strptime(from_date[: from_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z").strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+
+        if not to_date or to_date in ("undefined", "null"):
+            to_date = None
+        if to_date:
+            to_date = urllib.parse.unquote(to_date)
+            to_date = datetime.strptime(to_date[: to_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z").strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+            expenses = expenses.filter(created_date__lte=to_date)
+
+        expenses = expenses.filter(created_date__gte=from_date)
         paginated_expenses = self.paginate_queryset(expenses)
 
         return self.get_paginated_response(ExpenseSerializer(paginated_expenses, many=True).data)
@@ -102,34 +145,72 @@ class UserServices:
     def get_incomes(self):
         u = self.get_object()
         kw = self.request.query_params.get("kw")
-        incomes = u.incomes.filter(is_active=True)
+        from_date = self.request.query_params.get("fromDate")
+        to_date = self.request.query_params.get("toDate")
+
+        incomes = u.incomes.filter(is_active=True, group_income=None)
         if kw:
             incomes = incomes.filter(description__icontains=kw)
+
+        if not from_date or from_date in ("undefined", "null"):
+            from_date = datetime.now().replace(day=1, hour=0)
+        else:
+            from_date = urllib.parse.unquote(from_date)
+            from_date = datetime.strptime(from_date[: from_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
+
+        if not to_date or to_date in ("undefined", "null"):
+            to_date = None
+        if to_date:
+            to_date = urllib.parse.unquote(to_date)
+            to_date = datetime.strptime(to_date[: to_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
+            incomes = incomes.filter(created_date__lte=to_date)
+
+        incomes = incomes.filter(created_date__gte=from_date)
         paginated_incomes = self.paginate_queryset(incomes)
 
         return self.get_paginated_response(IncomeSerializer(paginated_incomes, many=True).data)
 
     def get_totals(self, request):
         user_id = request.user.id
-        start_date = request.query_params.get("startDate")
-        end_date = request.query_params.get("endDate")
+        from_date = self.request.query_params.get("fromDate")
+        to_date = self.request.query_params.get("toDate")
 
-        if not (start_date and end_date):
-            start_date = datetime.now().replace(day=1)
-            end_date = datetime.now()
+        if not from_date or from_date in ("undefined", "null"):
+            from_date = datetime.now().replace(day=1, hour=0)
+        else:
+            from_date = urllib.parse.unquote(from_date)
+            from_date = datetime.strptime(from_date[: from_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
 
-        total_income = Income.objects.filter(created_date__range=[start_date, end_date], user_id=user_id).aggregate(
-            total=Sum("amount")
-        )["total"]
+        if not to_date or to_date in ("undefined", "null"):
+            to_date = datetime.now()
+        else:
+            to_date = urllib.parse.unquote(to_date)
+            to_date = datetime.strptime(to_date[: to_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
 
-        total_expense = Expense.objects.filter(created_date__range=[start_date, end_date], user_id=user_id).aggregate(
-            total=Sum("amount")
-        )["total"]
+        try:
+            total_income = Income.objects.filter(
+                created_date__range=[from_date, to_date], user_id=user_id, is_active=True, group_income=None
+            ).aggregate(total=Sum("amount"))["total"]
 
-        print(total_income)
+            total_expense = Expense.objects.filter(
+                created_date__range=[from_date, to_date], user_id=user_id, is_active=True, group_expense=None
+            ).aggregate(total=Sum("amount"))["total"]
 
-        total_difference = total_income - total_expense
+            if not total_income:
+                total_income = 0
+            if not total_expense:
+                total_expense = 0
 
-        return Response(
-            data={"totalIncome": total_income, "totalExpense": total_expense, "totalDifference": total_difference}
-        )
+            total_difference = total_income - total_expense
+
+            return Response(
+                data={"totalIncome": total_income, "totalExpense": total_expense, "totalDifference": total_difference}
+            )
+        except TypeError:
+            return Response(data={"error": "an error occurred"}, status=status.HTTP_404_NOT_FOUND)
+
+    def active(self, request):
+        u = User.objects.get(uuid=request.data["uuid"])
+        u.is_active = not u.is_active
+
+        return Response(data=RebuildUrlUserSerializer(u.__dict__).data)

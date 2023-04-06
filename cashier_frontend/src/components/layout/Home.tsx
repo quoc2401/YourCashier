@@ -1,15 +1,24 @@
 import { FC, useState, useEffect } from "react";
 // import { Navigate } from "react-router-dom";
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, Navigate } from "react-router-dom";
 import { useStore } from "@/services/stores";
 import Header from "./Header";
 import Footer from "./Footer";
 import { Sidebar } from "primereact/sidebar";
+import { isActiveStyle, notActiveStyle } from "@/utils/style";
 
-const isActiveStyle =
-  "flex items-center text-slate-700 font-medium py-2 px-3 rounded-lg text-base transition-all transition-duration-300 p-link bg-primary-50";
-const notActiveStyle =
-  "flex items-center text-slate-700 py-2 px-3 rounded-lg text-base transition-all transition-duration-300 p-link";
+const items = [
+  {
+    icon: "pi pi-home",
+    name: "Home",
+    path: "/",
+  },
+  {
+    icon: "pi pi-users",
+    name: "Group",
+    path: "/groups",
+  },
+];
 
 const Home: FC = () => {
   const currentUser = useStore((state) => state.currentUser);
@@ -28,8 +37,8 @@ const Home: FC = () => {
     },
   ];
 
-  // if (currentUser && currentUser?.user_role === "ADMIN")
-  //   return <Navigate to={`/admin`} replace />;
+  if (currentUser && currentUser?.is_staff == true)
+    return <Navigate to={`/admin`} replace />;
 
   return (
     <div>

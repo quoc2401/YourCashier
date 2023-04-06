@@ -17,9 +17,15 @@ import CreateFormModal from "./CreateFormModal";
 
 interface GroupIncomeProps {
   adminId: any;
+  date: Date | Date[] | undefined;
+  setDate: (date: Date | Date[] | undefined) => void;
 }
 
-export const GroupIncome: FC<GroupIncomeProps> = ({ adminId }) => {
+export const GroupIncome: FC<GroupIncomeProps> = ({
+  adminId,
+  date,
+  setDate,
+}) => {
   const currentUser = useStore((state) => state.currentUser);
   const [incomes, setIncomes] = useState<Array<GroupIncomes>>([]);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -27,12 +33,13 @@ export const GroupIncome: FC<GroupIncomeProps> = ({ adminId }) => {
   const [filters, setFilter] = useState("");
   const [isEdit, setIsEdit] = useState(false);
   const [openModalIncome, setOpenModalIncome] = useState(false);
-  const [date, setDate] = useState<Date | Date[] | undefined>(undefined);
   const lazyTimeOut = useRef<ReturnType<typeof setTimeout>>();
   const [lazyState, setLazyState] = useState({
     first: 0,
     rows: 10,
     page: 1,
+    fromDate: null,
+    toDate: null,
   });
   const firstUpdate = useRef<any>(null);
   const params = useParams();
@@ -55,6 +62,19 @@ export const GroupIncome: FC<GroupIncomeProps> = ({ adminId }) => {
   useEffect(() => {
     formik.resetForm();
   }, [openModalIncome]);
+
+  useEffect(() => {
+    setLazyState((prev) => {
+      const _lazyParams = {
+        ...prev,
+        first: 0,
+        page: 1,
+        fromDate: date ? date[0] : null,
+        toDate: date ? date[1] : null,
+      };
+      return _lazyParams;
+    });
+  }, [date]);
 
   const loadGroups = async () => {
     setLoading(true);
@@ -86,7 +106,8 @@ export const GroupIncome: FC<GroupIncomeProps> = ({ adminId }) => {
         try {
           const res = await API_GROUP.API_GROUP.apiCreateIncome({
             income: {
-              ...value,
+              amount: value.amount,
+              description: value.description,
             },
             cashier_group: params.groupId,
           });

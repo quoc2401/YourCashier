@@ -46,13 +46,13 @@ const SignUp: FC = () => {
     validationSchema: Yup.object({
       username: Yup.string()
         .required("Username is required!")
-        .min(6, "Username must be at least 6 characters!"),
+        .min(5, "Username must be at least 5 characters!"),
       email: Yup.string()
         .email("example@example.com")
         .required("Email is required"),
       password: Yup.string()
         .required("Password is required!")
-        .min(6, "Password must be at least 6 characters!"),
+        .min(5, "Password must be at least 5 characters!"),
       firstName: Yup.string().required("First Name is required"),
       lastName: Yup.string().required("Last Name is required"),
       profilePicture: Yup.mixed().required(),

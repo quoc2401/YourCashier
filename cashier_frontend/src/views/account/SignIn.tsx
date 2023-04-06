@@ -28,10 +28,10 @@ const SignIn: FC = () => {
     validationSchema: Yup.object({
       username: Yup.string()
         .required("Username is required!")
-        .min(6, "Username must be at least 6 characters!"),
+        .min(5, "Username must be at least 5 characters!"),
       password: Yup.string()
         .required("Password is required!")
-        .min(6, "Password must be at least 6 characters!"),
+        .min(5, "Password must be at least 5 characters!"),
     }),
     onSubmit: async (value) => {
       setLoading(true);

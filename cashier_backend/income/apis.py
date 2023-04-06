@@ -74,7 +74,8 @@ class GroupIncomeViewSet(
                     user=u,
                 )
                 group_income = GroupIncome.objects.create(income=income, cashier_group_id=request.data["cashier_group"])
-                transaction.commit()
+
+            transaction.commit()
 
         except Exception as e:
             transaction.rollback()

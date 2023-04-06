@@ -13,9 +13,17 @@ class ApiGroup {
   };
 
   apiGetGroupByUser = (id: number | undefined, params: any, filter: string) => {
-    return axios.get(
-      `users/${id}/groups/?page=${params.page}&page_size=${params.rows}&kw=${filter}`
-    );
+    return axios({
+      method: "get",
+      url: `users/${id}/groups/`,
+      params: {
+        page: params.page,
+        page_size: params.rows,
+        kw: filter,
+        fromDate: params.fromDate,
+        toDate: params.toDate,
+      },
+    });
   };
 
   apiCreateGroup = (data: GroupRequest) => {
@@ -23,9 +31,17 @@ class ApiGroup {
   };
 
   apiGetGroupExpenseApproved = (id: any, params: any, filter: string) => {
-    return axios.get(
-      `cashier-groups/${id}/expenses_approved/?page=${params.page}&page_size=${params.rows}&kw=${filter}`
-    );
+    return axios({
+      method: "get",
+      url: `cashier-groups/${id}/expenses_approved/`,
+      params: {
+        page: params.page,
+        page_size: params.rows,
+        kw: filter,
+        fromDate: params.fromDate,
+        toDate: params.toDate,
+      },
+    });
   };
 
   apiGetGroupExpenseNotApproved = (id: any) => {
@@ -33,9 +49,17 @@ class ApiGroup {
   };
 
   apiGetGroupIncome = (id: any, params: any, filter: string) => {
-    return axios.get(
-      `cashier-groups/${id}/income/?page=${params.page}&page_size=${params.rows}&kw=${filter}`
-    );
+    return axios({
+      method: "get",
+      url: `cashier-groups/${id}/income/`,
+      params: {
+        page: params.page,
+        page_size: params.rows,
+        kw: filter,
+        fromDate: params.fromDate,
+        toDate: params.toDate,
+      },
+    });
   };
 
   apiGetGroupMember = (id: any) => {
@@ -56,6 +80,17 @@ class ApiGroup {
 
   apiCreateIncome = (params: any) => {
     return axios.post(`group-incomes/`, params);
+  };
+
+  apiGetTotal = (id: any, params: any) => {
+    return axios({
+      method: "get",
+      url: `cashier-groups/${id}/get_totals/`,
+      params: {
+        fromDate: params.fromDate,
+        toDate: params.toDate,
+      },
+    });
   };
 }
 

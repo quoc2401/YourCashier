@@ -28,8 +28,6 @@ const Home: FC = () => {
     },
   ];
 
-  
-
   // if (currentUser && currentUser?.user_role === "ADMIN")
   //   return <Navigate to={`/admin`} replace />;
 

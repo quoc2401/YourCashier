@@ -151,13 +151,8 @@ class CashierGroupViewSet(
     @action(methods=["GET"], detail=True)
     def expenses_not_approved(self, request, pk):
         group_expenses = GroupExpense.objects.filter(cashier_group_id=pk, is_approved=False, expense__is_active=True)
-        kw = self.request.query_params.get("kw")
 
-        if kw:
-            group_expenses = group_expenses.filter(name__icontains=kw)
-        paginated_expenses = self.paginate_queryset(group_expenses)
-
-        return self.get_paginated_response(GroupExpenseSerializer(paginated_expenses, many=True).data)
+        return Response(data=GroupExpenseSerializer(group_expenses, many=True).data, status=status.HTTP_200_OK)
 
     @action(methods=["GET"], detail=True)
     def expenses_approved(self, request, pk):
@@ -165,7 +160,7 @@ class CashierGroupViewSet(
         kw = self.request.query_params.get("kw")
 
         if kw:
-            group_expenses = group_expenses.filter(name__icontains=kw)
+            group_expenses = group_expenses.filter(expense__description__icontains=kw)
         paginated_expenses = self.paginate_queryset(group_expenses)
 
         return self.get_paginated_response(GroupExpenseSerializer(paginated_expenses, many=True).data)
@@ -176,7 +171,7 @@ class CashierGroupViewSet(
         kw = self.request.query_params.get("kw")
 
         if kw:
-            group_income = group_income.filter(name__icontains=kw)
+            group_income = group_income.filter(Q(income__description__icontains=kw))
         paginated_incomes = self.paginate_queryset(group_income)
 
         return self.get_paginated_response(GroupIncomeSerializer(paginated_incomes, many=True).data)

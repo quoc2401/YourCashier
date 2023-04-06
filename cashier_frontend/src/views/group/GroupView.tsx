@@ -36,7 +36,6 @@ const GroupView: FC = () => {
 
   useEffect(() => {
     if (firstUpdate.current) {
-      console.log("aaaaaaaaa");
       lazyTimeOut.current = setTimeout(async () => {
         loadGroups();
       }, 500);
@@ -88,9 +87,9 @@ const GroupView: FC = () => {
           touchUI={false}
           selectionMode="range"
           className="w-full sm:w-2/4 lg:w-1/4 ml-auto"
+          inputClassName="rounded-md"
           dateFormat="dd/mm/yy"
-          placeholder="Từ ngày - Đến ngày"
-          readOnlyInput
+          placeholder="From date - To date"
           onChange={(e) => setDate(e.value)}
         />
 

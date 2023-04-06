@@ -1,6 +1,9 @@
 from rest_framework import viewsets, permissions, generics, parsers, status
 from rest_framework.decorators import action, parser_classes as method_parsers
 from rest_framework.response import Response
+from expense.models import Expense
+
+from income.models import Income
 from .perms import IsOwner, IsAdmin
 from .models import User, CashierGroup
 from expense.models import GroupExpense
@@ -190,26 +193,21 @@ class CashierGroupViewSet(
     def expenses_approved(self, request, pk):
         group_expenses = GroupExpense.objects.filter(cashier_group_id=pk, is_approved=True, expense__is_active=True)
         kw = self.request.query_params.get("kw")
-        # from_date = self.request.query_params.get("fromDate")
-        # to_date = self.request.query_params.get("toDate")
+        from_date = self.request.query_params.get("fromDate")
+        to_date = self.request.query_params.get("toDate")
 
         if kw:
             group_expenses = group_expenses.filter(expense__description__icontains=kw)
 
-        # if not from_date or from_date in ("undefined", "null"):
-        #     from_date = datetime.now().replace(day=1, hour=0)
-        # else:
-        #     from_date = urllib.parse.unquote(from_date)
-        #     from_date = datetime.strptime(from_date[: from_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
+        if not from_date:
+            from_date = datetime.now().replace(day=1, hour=0)
 
-        # if not to_date or to_date in ("undefined", "null"):
-        #     to_date = None
-        # if to_date:
-        #     to_date = urllib.parse.unquote(to_date)
-        #     to_date = datetime.strptime(to_date[: to_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
-        #     group_expenses = group_expenses.filter(expense__created_date__lte=to_date)
+        if not to_date:
+            to_date = None
+        if to_date:
+            group_expenses = group_expenses.filter(expense__created_date__lte=to_date)
 
-        # group_expenses = group_expenses.filter(expense__created_date__gte=from_date)
+        group_expenses = group_expenses.filter(expense__created_date__gte=from_date)
         paginated_expenses = self.paginate_queryset(group_expenses)
 
         return self.get_paginated_response(GroupExpenseSerializer(paginated_expenses, many=True).data)
@@ -218,26 +216,21 @@ class CashierGroupViewSet(
     def income(self, request, pk):
         group_income = GroupIncome.objects.filter(cashier_group_id=pk, income__is_active=True)
         kw = self.request.query_params.get("kw")
-        # from_date = self.request.query_params.get("fromDate")
-        # to_date = self.request.query_params.get("toDate")
+        from_date = self.request.query_params.get("fromDate")
+        to_date = self.request.query_params.get("toDate")
 
         if kw:
-            group_income = group_income.filter(Q(income__description__icontains=kw))
+            group_income = group_income.filter(income__description__icontains=kw)
 
-        # if not from_date or from_date in ("undefined", "null"):
-        #     from_date = datetime.now().replace(day=1, hour=0)
-        # else:
-        #     from_date = urllib.parse.unquote(from_date)
-        #     from_date = datetime.strptime(from_date[: from_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z %z")
+        if not from_date:
+            from_date = datetime.now().replace(day=1, hour=0)
 
-        # if not to_date or to_date in ("undefined", "null"):
-        #     to_date = None
-        # if to_date:
-        #     to_date = urllib.parse.unquote(to_date)
-        #     to_date = datetime.strptime(to_date[: to_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z %z")
-        #     group_income = group_income.filter(income__created_date__lte=to_date)
+        if not to_date:
+            to_date = None
+        if to_date:
+            group_income = group_income.filter(income__created_date__lte=to_date)
 
-        # group_income = group_income.filter(income__created_date__gte=from_date)
+        group_income = group_income.filter(income__created_date__gte=from_date)
         paginated_incomes = self.paginate_queryset(group_income)
 
         return self.get_paginated_response(GroupIncomeSerializer(paginated_incomes, many=True).data)
@@ -247,28 +240,22 @@ class CashierGroupViewSet(
         from_date = self.request.query_params.get("fromDate")
         to_date = self.request.query_params.get("toDate")
 
-        if not from_date or from_date in ("undefined", "null"):
+        if not from_date:
             from_date = datetime.now().replace(day=1, hour=0)
-        else:
-            from_date = urllib.parse.unquote(from_date)
-            from_date = datetime.strptime(from_date[: from_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
 
-        if not to_date or to_date in ("undefined", "null"):
+        if not to_date:
             to_date = datetime.now()
-        else:
-            to_date = urllib.parse.unquote(to_date)
-            to_date = datetime.strptime(to_date[: to_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
 
         try:
-            total_income = GroupExpense.objects.filter(
-                expense__created_date__range=[from_date, to_date],
-                cashier_group=pk,
-            ).aggregate(total=Sum("expense__amount"))["total"]
+            total_income = Income.objects.filter(
+                created_date__range=[from_date, to_date],
+                group_income__id=pk,
+            ).aggregate(total=Sum("amount"))["total"]
 
-            total_expense = GroupIncome.objects.filter(
-                income__created_date__range=[from_date, to_date],
-                cashier_group=pk,
-            ).aggregate(total=Sum("income__amount"))["total"]
+            total_expense = Expense.objects.filter(
+                created_date__range=[from_date, to_date],
+                group_expense__id=pk,
+            ).aggregate(total=Sum("amount"))["total"]
 
             if not total_income:
                 total_income = 0

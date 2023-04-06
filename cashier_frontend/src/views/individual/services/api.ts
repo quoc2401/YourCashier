@@ -5,25 +5,23 @@ import { Expense, Income } from "@/utils/responseInterfaces";
 class ApiUser {
     
     apiGetExpenses: any = (userId: number, params: any) => {
-        const queryParams = params
-        ? Object.keys(params)
-            .map(
-              k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k])
-            )
-            .join('&')
-        : ''
-        return axiosClient.get(`users/${userId}/expenses/?${queryParams}`)
+        return axiosClient({
+            method: "get",
+            url: `users/${userId}/expenses/`,
+            params: {
+                ...params
+            },
+        })
     }
 
     apiGetIncomes: any = (userId: number, params: any) => {
-        const queryParams = params
-        ? Object.keys(params)
-            .map(
-              k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k])
-            )
-            .join('&')
-        : ''
-        return axiosClient.get(`users/${userId}/incomes/?${queryParams}`)
+        return axiosClient({
+            method: "get",
+            url: `users/${userId}/incomes/`,
+            params: {
+                ...params
+            },
+        })
     }
 
     apiCreateIncome: any = (data: RIncome) => {
@@ -51,14 +49,13 @@ class ApiUser {
     }
 
     apiGetTotal: any = (params: any) => {
-        const queryParams = params
-        ? Object.keys(params)
-            .map(
-              k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k])
-            )
-            .join('&')
-        : ''
-        return axiosClient.get(`users/total_stats/?${queryParams}`)
+        return axiosClient({
+            method: "get",
+            url: `users/total_stats/`,
+            params: {
+                ...params
+            },
+        })
     }
 }
 

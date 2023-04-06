@@ -26,6 +26,8 @@ const GroupView: FC = () => {
     first: 0,
     rows: 10,
     page: 1,
+    fromDate: null,
+    toDate: null,
   });
   const [openModalGroup, setOpenModalGroup] = useState(false);
   const firstUpdate = useRef<any>(null);
@@ -36,7 +38,6 @@ const GroupView: FC = () => {
 
   useEffect(() => {
     if (firstUpdate.current) {
-      console.log("aaaaaaaaa");
       lazyTimeOut.current = setTimeout(async () => {
         loadGroups();
       }, 500);
@@ -45,6 +46,19 @@ const GroupView: FC = () => {
     }
     return () => clearTimeout(lazyTimeOut.current);
   }, [filters, date]);
+
+  useEffect(() => {
+    setLazyState((prev) => {
+      const _lazyParams = {
+        ...prev,
+        first: 0,
+        page: 1,
+        fromDate: date ? date[0] : null,
+        toDate: date ? date[1] : null,
+      };
+      return _lazyParams;
+    });
+  }, [date]);
 
   const loadGroups = async () => {
     setLoading(true);
@@ -88,9 +102,9 @@ const GroupView: FC = () => {
           touchUI={false}
           selectionMode="range"
           className="w-full sm:w-2/4 lg:w-1/4 ml-auto"
+          inputClassName="rounded-md"
           dateFormat="dd/mm/yy"
           placeholder="From date - To date"
-          readOnlyInput
           onChange={(e) => setDate(e.value)}
         />
 

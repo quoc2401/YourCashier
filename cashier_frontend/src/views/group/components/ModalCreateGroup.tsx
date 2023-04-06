@@ -56,8 +56,6 @@ const ModalCreateGroup: FC<ModalCreateGroupProps> = ({
           toast.success("Create group successful", {
             theme: "colored",
           });
-
-          closeDialog();
         }
         setLoading(false);
       } catch (error) {
@@ -170,7 +168,7 @@ const ModalCreateGroup: FC<ModalCreateGroupProps> = ({
                       `https://res.cloudinary.com/dynupxxry/image/upload/v1660532211/non-avatar_nw91c3.png`
                     }
                     className="mb-2 mr-2"
-                    removable
+                    removable={loading ? false : true}
                     onRemove={() => onRemoveMember(user)}
                   />
                 ))

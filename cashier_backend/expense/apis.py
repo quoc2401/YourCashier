@@ -60,6 +60,7 @@ class ExpenseViewSet(
 class GroupExpenseViewSet(
     viewsets.ViewSet,
     generics.DestroyAPIView,
+    generics.CreateAPIView,
     generics.ListAPIView,
     generics.RetrieveAPIView,
     generics.UpdateAPIView,
@@ -84,13 +85,14 @@ class GroupExpenseViewSet(
 
         return Response(status=200)
 
-    @action(methods=["POST"], detail=False, serializer_class=CreateGroupExpenseSerializer)
-    def create_new(self, request):
+    def create(self, request, *args, **kwargs):
         try:
+            u = request.user
             with transaction.atomic():
-                u = User.objects.get(username="congsang")
                 expense = Expense.objects.create(
-                    amount=request.data["expense"]["amount"], description=request.data["expense"]["description"], user=u
+                    amount=request.data["expense"]["amount"],
+                    description=request.data["expense"]["description"],
+                    user=u,
                 )
                 group_expense = GroupExpense.objects.create(
                     expense=expense, cashier_group_id=request.data["cashier_group"]

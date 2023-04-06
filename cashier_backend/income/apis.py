@@ -55,6 +55,7 @@ class IncomeViewSet(
 class GroupIncomeViewSet(
     viewsets.ViewSet,
     generics.DestroyAPIView,
+    generics.CreateAPIView,
     generics.ListAPIView,
     generics.RetrieveAPIView,
     generics.UpdateAPIView,
@@ -63,13 +64,14 @@ class GroupIncomeViewSet(
     serializer_class = GroupIncomeSerializer
     parser_classes = [parsers.JSONParser]
 
-    @action(methods=["POST"], detail=False, serializer_class=CreateGroupIncomeSerializer)
-    def create_new(self, request):
+    def create(self, request, *args, **kwargs):
         try:
+            u = request.user
             with transaction.atomic():
-                u = User.objects.get(username=request.user.username)
                 income = Income.objects.create(
-                    amount=request.data["income"]["amount"], description=request.data["income"]["description"], user=u
+                    amount=request.data["income"]["amount"],
+                    description=request.data["income"]["description"],
+                    user=u,
                 )
                 group_income = GroupIncome.objects.create(income=income, cashier_group_id=request.data["cashier_group"])
 

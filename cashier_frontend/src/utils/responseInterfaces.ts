@@ -37,3 +37,27 @@ export interface Group {
   is_active: boolean;
   name: string;
 }
+
+export interface GroupExpense {
+  id: number;
+  expense: {
+    id: number;
+    user: User;
+    amount: number;
+    description: string;
+    created_date: string;
+  };
+  cashier_group: number;
+}
+
+export interface GroupIncomes {
+  id: number;
+  income: {
+    id: number;
+    user: User;
+    amount: number;
+    description: string;
+    created_date: string;
+  };
+  cashier_group: number;
+}

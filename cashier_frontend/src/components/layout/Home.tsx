@@ -20,11 +20,22 @@ const items = [
   },
 ];
 
-
-
 const Home: FC = () => {
   const currentUser = useStore((state) => state.currentUser);
   const [isOpenedSideBar, setIsOpenedSideBar] = useState(false);
+
+  const items = [
+    {
+      icon: "pi pi-home",
+      name: "Home",
+      path: "/",
+    },
+    {
+      icon: "pi pi-users",
+      name: "Group",
+      path: "/groups",
+    },
+  ];
 
   if (currentUser && currentUser?.is_staff == true)
     return <Navigate to={`/admin`} replace />;

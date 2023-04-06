@@ -4,9 +4,7 @@ class ApiAdmin {
     apiGetUsers: any = (params: any) => {
         const queryParams = params
         ? Object.keys(params)
-            .map(
-              k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k])
-            )
+            .map(k => k + '=' + params[k])
             .join('&')
         : ''
         return axios.get(`users/?${queryParams}`)

@@ -40,7 +40,9 @@ const GroupDetail: FC = () => {
   }, []);
 
   useEffect(() => {
-    loadTotals();
+    const timeOut = setTimeout(() => loadTotals(), 300);
+
+    return () => clearTimeout(timeOut);
   }, [lazyParams]);
 
   useEffect(() => {

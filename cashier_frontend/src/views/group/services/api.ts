@@ -1,4 +1,5 @@
 import { GroupRequest } from "@/utils/requestInterfaces";
+import { convertDateTimeRequestAPI } from "@/utils";
 import axios from "@/services/axiosClient";
 
 class ApiGroup {
@@ -20,8 +21,8 @@ class ApiGroup {
         page: params.page,
         page_size: params.rows,
         kw: filter,
-        fromDate: params.fromDate,
-        toDate: params.toDate,
+        fromDate: convertDateTimeRequestAPI(params.fromDate),
+        toDate: convertDateTimeRequestAPI(params.toDate),
       },
     });
   };
@@ -38,8 +39,8 @@ class ApiGroup {
         page: params.page,
         page_size: params.rows,
         kw: filter,
-        fromDate: params.fromDate,
-        toDate: params.toDate,
+        fromDate: convertDateTimeRequestAPI(params.fromDate),
+        toDate: convertDateTimeRequestAPI(params.toDate),
       },
     });
   };
@@ -56,8 +57,8 @@ class ApiGroup {
         page: params.page,
         page_size: params.rows,
         kw: filter,
-        fromDate: params.fromDate,
-        toDate: params.toDate,
+        fromDate: convertDateTimeRequestAPI(params.fromDate),
+        toDate: convertDateTimeRequestAPI(params.toDate),
       },
     });
   };
@@ -87,8 +88,8 @@ class ApiGroup {
       method: "get",
       url: `cashier-groups/${id}/get_totals/`,
       params: {
-        fromDate: params.fromDate,
-        toDate: params.toDate,
+        fromDate: convertDateTimeRequestAPI(params.fromDate),
+        toDate: convertDateTimeRequestAPI(params.toDate),
       },
     });
   };

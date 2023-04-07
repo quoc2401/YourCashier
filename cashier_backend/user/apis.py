@@ -1,9 +1,6 @@
 from rest_framework import viewsets, permissions, generics, parsers, status
 from rest_framework.decorators import action, parser_classes as method_parsers
 from rest_framework.response import Response
-from expense.models import Expense
-
-from income.models import Income
 from .perms import IsOwner, IsAdmin
 from .models import User, CashierGroup
 from expense.models import GroupExpense
@@ -85,31 +82,25 @@ class UserViewSet(
     def groups(self, request, pk):
         user = User.objects.get(pk=pk)
         kw = self.request.query_params.get("kw")
-        # from_date = self.request.query_params.get("fromDate")
-        # to_date = self.request.query_params.get("toDate")
+        from_date = self.request.query_params.get("fromDate")
+        to_date = self.request.query_params.get("toDate")
 
         groups = user.cashier_groups.filter(is_active=True)
 
         if kw:
             groups = groups.filter(name__icontains=kw)
 
-        # if not from_date or from_date in ("undefined", "null"):
-        #     from_date = datetime.now().replace(day=1, hour=0)
-        # else:
-        #     from_date = urllib.parse.unquote(from_date)
-        #     from_date = datetime.strptime(from_date[: from_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
+        if from_date:
+            groups = groups.filter(created_date__gte=from_date)
 
-        # if not to_date or to_date in ("undefined", "null"):
-        #     to_date = None
-        # if to_date:
-        #     to_date = urllib.parse.unquote(to_date)
-        #     to_date = datetime.strptime(to_date[: to_date.index(" (")], "%a %b %d %Y %H:%M:%S %Z%z")
-        #     groups = groups.filter(created_date__lte=to_date)
+        if not to_date:
+            to_date = None
+        if to_date:
+            groups = groups.filter(created_date__lte=to_date)
 
-        # groups = groups.filter(created_date__gte=from_date)
-        paginated_incomes = self.paginate_queryset(groups)
+        paginated_groups = self.paginate_queryset(groups)
 
-        return self.get_paginated_response(CashierGroupSerializer(paginated_incomes, many=True).data)
+        return self.get_paginated_response(CashierGroupSerializer(paginated_groups, many=True).data)
 
     @action(methods=["GET"], detail=True)
     def expenses(self, request, pk):
@@ -199,15 +190,14 @@ class CashierGroupViewSet(
         if kw:
             group_expenses = group_expenses.filter(expense__description__icontains=kw)
 
-        if not from_date:
-            from_date = datetime.now().replace(day=1, hour=0)
+        if from_date:
+            group_expenses = group_expenses.filter(expense__created_date__gte=from_date)
 
         if not to_date:
             to_date = None
         if to_date:
             group_expenses = group_expenses.filter(expense__created_date__lte=to_date)
 
-        group_expenses = group_expenses.filter(expense__created_date__gte=from_date)
         paginated_expenses = self.paginate_queryset(group_expenses)
 
         return self.get_paginated_response(GroupExpenseSerializer(paginated_expenses, many=True).data)
@@ -222,15 +212,14 @@ class CashierGroupViewSet(
         if kw:
             group_income = group_income.filter(income__description__icontains=kw)
 
-        if not from_date:
-            from_date = datetime.now().replace(day=1, hour=0)
+        if from_date:
+            group_income = group_income.filter(income__created_date__gte=from_date)
 
         if not to_date:
             to_date = None
         if to_date:
             group_income = group_income.filter(income__created_date__lte=to_date)
 
-        group_income = group_income.filter(income__created_date__gte=from_date)
         paginated_incomes = self.paginate_queryset(group_income)
 
         return self.get_paginated_response(GroupIncomeSerializer(paginated_incomes, many=True).data)
@@ -247,15 +236,15 @@ class CashierGroupViewSet(
             to_date = datetime.now()
 
         try:
-            total_income = Income.objects.filter(
-                created_date__range=[from_date, to_date],
-                group_income__id=pk,
-            ).aggregate(total=Sum("amount"))["total"]
+            total_income = GroupIncome.objects.filter(
+                income__created_date__range=[from_date, to_date],
+                cashier_group=pk,
+            ).aggregate(total=Sum("income__amount"))["total"]
 
-            total_expense = Expense.objects.filter(
-                created_date__range=[from_date, to_date],
-                group_expense__id=pk,
-            ).aggregate(total=Sum("amount"))["total"]
+            total_expense = GroupExpense.objects.filter(
+                expense__created_date__range=[from_date, to_date],
+                cashier_group=pk,
+            ).aggregate(total=Sum("expense__amount"))["total"]
 
             if not total_income:
                 total_income = 0

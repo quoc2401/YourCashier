@@ -45,7 +45,9 @@ export const GroupIncome: FC<GroupIncomeProps> = ({
   const params = useParams();
 
   useEffect(() => {
-    loadGroups();
+    const timeOut = setTimeout(() => loadGroups(), 300);
+
+    return () => clearTimeout(timeOut);
   }, [lazyState]);
 
   useEffect(() => {
@@ -57,7 +59,7 @@ export const GroupIncome: FC<GroupIncomeProps> = ({
       firstUpdate.current = true;
     }
     return () => clearTimeout(lazyTimeOut.current);
-  }, [filters, date]);
+  }, [filters]);
 
   useEffect(() => {
     formik.resetForm();

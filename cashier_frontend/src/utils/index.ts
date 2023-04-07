@@ -25,3 +25,10 @@ export const isBool = (value: any) => {
   if (typeof value == "boolean") return true;
   else return false;
 };
+
+export const convertDateTimeRequestAPI = (value: any) => {
+  if (value == null) return value;
+  const timestamp = value.getTime() - value.getTimezoneOffset() * 60000;
+  const correctDate = new Date(timestamp);
+  return correctDate.toISOString().slice(0, -1);
+};

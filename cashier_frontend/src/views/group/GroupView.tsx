@@ -45,7 +45,7 @@ const GroupView: FC = () => {
       firstUpdate.current = true;
     }
     return () => clearTimeout(lazyTimeOut.current);
-  }, [filters, date]);
+  }, [filters]);
 
   useEffect(() => {
     setLazyState((prev) => {

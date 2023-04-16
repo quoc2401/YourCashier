@@ -4,10 +4,11 @@ from cashier_backend.abstract_models import BaseModel
 from user.models import User, CashierGroup
 
 
+
 class WarningLevel(Enum):
-    WARN_ONLY = "WARN_ONLY"
-    WARN_AND_STOP = "WARN_AND_STOP"
-    WARN_WITH_INCOME = "WARN_WITH_INCOME"
+    WARN_OFF = "WARN_OFF"
+    WARN_SIMPLE = "WARN_SIMPLE"
+    WARN_MEDIUM = "WARN_MEDIUM"
 
     @classmethod
     def choices(cls):
@@ -27,6 +28,5 @@ class GroupExpense(models.Model):
 
 
 class ExpenseWarning(BaseModel):
-    user = models.ForeignKey(User, related_name="expense_warnings", on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=0)
+    user = models.OneToOneField(User, related_name="expense_warnings", on_delete=models.CASCADE)
     warn_level = models.CharField(max_length=255, choices=WarningLevel.choices())

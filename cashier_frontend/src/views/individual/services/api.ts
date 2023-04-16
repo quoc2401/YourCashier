@@ -1,4 +1,5 @@
 import axiosClient from "@/services/axiosClient";
+import { WARN_LEVELS } from "@/utils/constant";
 import { Expense as RExpense, Income as RIncome } from "@/utils/requestInterfaces";
 import { Expense, Income } from "@/utils/responseInterfaces";
 
@@ -56,6 +57,14 @@ class ApiUser {
                 ...params
             },
         })
+    }
+
+    apiToggleWarning: any = (userId: number, level: typeof WARN_LEVELS[keyof typeof WARN_LEVELS]) => {
+        return axiosClient.patch(`users/${userId}/toggle-warning/`, {level: level})
+    }
+
+    apiGetWarning: any = (userId: number) => {
+        return axiosClient.get(`users/${userId}/warning/`)
     }
 }
 

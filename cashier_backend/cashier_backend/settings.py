@@ -160,3 +160,10 @@ CKEDITOR_UPLOAD_PATH = "ckeditor/cashier_backend/"
 AUTH_USER_MODEL = "user.User"
 
 TIME_ZONE = "Asia/Ho_Chi_Minh"
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = config("EMAIL_HOST")
+EMAIL_PORT = config("EMAIL_PORT")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS")
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")

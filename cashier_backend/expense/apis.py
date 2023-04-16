@@ -1,7 +1,10 @@
 from rest_framework import viewsets, permissions, generics, status, parsers
 from rest_framework.response import Response
 from rest_framework.decorators import action
+
+from expense.services import ExpenseService
 from .models import Expense, GroupExpense
+from income.models import Income
 from user.models import User
 from .serializers import (
     ExpenseSerializer,
@@ -48,13 +51,7 @@ class ExpenseViewSet(
         return self.permission_classes
 
     def create(self, request, *args, **kwargs):
-        u = request.user
-        serializer = CreateExpenseSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.validated_data["user"] = u
-            serializer.save()
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
-        return Response(data=serializer.error_messages, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return ExpenseService.create(request)
 
 
 class GroupExpenseViewSet(

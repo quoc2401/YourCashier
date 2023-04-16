@@ -7,15 +7,14 @@ import requests
 from django.contrib.sites.models import Site
 from rest_framework.response import Response
 from rest_framework import status
-from .models import User, CashierGroup
+from .models import User
 from oauth2_provider.models import AccessToken
 from expense.serializers import ExpenseSerializer
 from income.serializers import IncomeSerializer
-from datetime import datetime, date, timedelta
+from datetime import datetime
 from income.models import Income
-from expense.models import Expense
+from expense.models import Expense, ExpenseWarning, WarningLevel
 from django.db.models import Sum
-import urllib.parse
 
 # from dateutil import parser
 
@@ -194,3 +193,20 @@ class UserServices:
         u.is_active = not u.is_active
 
         return Response(data=RebuildUrlUserSerializer(u.__dict__).data)
+
+    def toggle_warning(self, request):
+        u = self.get_object()
+        expense_warning, created = ExpenseWarning.objects.get_or_create(user=u)
+
+        level = request.data["level"]
+        warn_level = WarningLevel.__members__.get(level).value
+        expense_warning.warn_level = warn_level
+        expense_warning.save()
+
+        return Response(data={"message": "success"})
+
+    def get_warning(self, request):
+        u = self.get_object()
+        expense_warning = ExpenseWarning.objects.get(user=u)
+
+        return Response(data={"warnLevel": expense_warning.warn_level})

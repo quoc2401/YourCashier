@@ -2,10 +2,13 @@ import { FC, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { CircularProgress } from "react-cssfx-loading";
 import Tippy from "@tippyjs/react";
-import { Menu } from "primereact/menu";
+import { Menu, MenuProps } from "primereact/menu";
 import { toast } from "react-toastify";
 import { useStore } from "@/services/stores";
 import { API_ACCOUNT } from "@/services/axiosClient";
+import { MenuItem } from "primereact/menuitem";
+import WarnMenuItem from "../WarnMenuItem";
+import { PrimeIcons } from "primereact/api";
 
 interface HeaderProps {
   setOpenedSideBar: (e: boolean) => void;
@@ -27,20 +30,26 @@ const Header: FC<HeaderProps> = ({ setOpenedSideBar, openedSideBar }) => {
     }
     setLoading(false)
   }
-
-  const menuItems = [
+  const menuItems:MenuItem[] = [
     {
       label: "Your account info",
+      icon: PrimeIcons.USER,
       command: () => {
         // window.location.pathname = '/user-info'
       },
     },
     {
       label: "Sign out",
+      icon: PrimeIcons.SIGN_OUT,
       command: () => {
         handleLogout();
       },
     },
+    {
+      label: "Warning option",
+      icon: PrimeIcons.BELL,
+      template: WarnMenuItem
+    }
   ];
 
   return (

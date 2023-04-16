@@ -127,6 +127,14 @@ class UserViewSet(
     def active(self, request):
         return UserServices.active(self, request)
 
+    @action(methods=["PATCH"], detail=True, url_path="toggle-warning", parser_classes=[parsers.JSONParser])
+    def toggle_warning(self, request, pk):
+        return UserServices.toggle_warning(self, request)
+
+    @action(methods=["GET"], detail=True, url_path="warning")
+    def get_warning(self, request, pk):
+        return UserServices.get_warning(self, request)
+
 
 class CashierGroupViewSet(
     viewsets.ViewSet,
